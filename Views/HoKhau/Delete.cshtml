@@ -1,0 +1,70 @@
+@model QuanLyKhuDanCu.Models.HoKhau
+
+@{
+    ViewData["Title"] = "Xóa hộ khẩu";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>Cảnh báo:</strong> Bạn có chắc chắn muốn xóa hộ khẩu này? Hành động này không thể hoàn tác.
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-home me-1"></i>
+        Thông tin hộ khẩu sẽ bị xóa
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Mã hộ khẩu:</dt>
+                    <dd class="col-sm-8">@Model.MaHoKhau</dd>
+                    
+                    <dt class="col-sm-4">Địa chỉ:</dt>
+                    <dd class="col-sm-8">@Model.DiaChi</dd>
+                    
+                    <dt class="col-sm-4">Chủ hộ:</dt>
+                    <dd class="col-sm-8">@Model.ChuHo.HoTen</dd>
+                    
+                    <dt class="col-sm-4">Ngày tạo:</dt>
+                    <dd class="col-sm-8">@Model.NgayTao.ToString("dd/MM/yyyy")</dd>
+                    
+                    <dt class="col-sm-4">Trạng thái:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.TrangThai)
+                        {
+                            <span class="badge bg-success">Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Đã khóa</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Số nhân khẩu:</dt>
+                    <dd class="col-sm-8">@Model.NhanKhaus.Count</dd>
+                    
+                    <dt class="col-sm-4">Ghi chú:</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.GhiChu) ? "Không có" : Model.GhiChu)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="HoKhauId" />
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Xác nhận xóa
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </form>
+    </div>
+</div>

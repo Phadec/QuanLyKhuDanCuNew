@@ -1,0 +1,138 @@
+@model QuanLyKhuDanCu.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = "_LayoutLogin";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="login-logo">
+                <img src="~/images/logo.png" alt="Logo Khu Dân Cư" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2080%2080%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22grad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20style%3D%22stop-color%3A%231a4a73%3Bstop-opacity%3A1%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20style%3D%22stop-color%3A%233498db%3Bstop-opacity%3A1%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20fill%3D%22url%28%23grad%29%22%20d%3D%22M40%2038.5l-18%2011.2V34.2L40%2023l18%2011.2v15.5z%22%2F%3E%3Cpath%20fill%3D%22%232980b9%22%20d%3D%22M40%2057l-18-11.2L40%2034.6l18%2011.2z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E';" />
+                <h2 class="brand-text">Quản Lý Khu Dân Cư</h2>
+            </div>
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header">
+                    <h3 class="text-center font-weight-light">Đăng ký tài khoản</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Account" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+                        <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert">
+                            <ul></ul>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="HoTen" class="form-control" id="inputHoTen" placeholder="Họ và Tên" />
+                                    <label asp-for="HoTen" for="inputHoTen"><i class="fas fa-user me-2"></i>Họ và Tên</label>
+                                    <span asp-validation-for="HoTen" class="field-validation-error"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Email" class="form-control" id="inputEmail" placeholder="name@example.com" />
+                                    <label asp-for="Email" for="inputEmail"><i class="fas fa-envelope me-2"></i>Email</label>
+                                    <span asp-validation-for="Email" class="field-validation-error"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="SoDienThoai" class="form-control" id="inputSoDienThoai" placeholder="Số điện thoại" />
+                                    <label asp-for="SoDienThoai" for="inputSoDienThoai"><i class="fas fa-phone me-2"></i>Số điện thoại</label>
+                                    <span asp-validation-for="SoDienThoai" class="field-validation-error"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="CMND" class="form-control" id="inputCMND" placeholder="CMND/CCCD" />
+                                    <label asp-for="CMND" for="inputCMND"><i class="fas fa-id-card me-2"></i>CMND/CCCD</label>
+                                    <span asp-validation-for="CMND" class="field-validation-error"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <input type="date" asp-for="NgaySinh" class="form-control" id="inputNgaySinh" />
+                            <label asp-for="NgaySinh" for="inputNgaySinh"><i class="fas fa-calendar me-2"></i>Ngày sinh</label>
+                            <span asp-validation-for="NgaySinh" class="field-validation-error"></span>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <input asp-for="DiaChi" class="form-control" id="inputDiaChi" placeholder="Địa chỉ" />
+                            <label asp-for="DiaChi" for="inputDiaChi"><i class="fas fa-home me-2"></i>Địa chỉ</label>
+                            <span asp-validation-for="DiaChi" class="field-validation-error"></span>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3 password-container">
+                                    <input asp-for="Password" class="form-control" id="inputPassword" placeholder="Mật khẩu" />
+                                    <label asp-for="Password" for="inputPassword"><i class="fas fa-lock me-2"></i>Mật khẩu</label>
+                                    <button type="button" class="btn toggle-password" tabindex="-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <span asp-validation-for="Password" class="field-validation-error"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3 password-container">
+                                    <input asp-for="ConfirmPassword" class="form-control" id="inputConfirmPassword" placeholder="Xác nhận mật khẩu" />
+                                    <label asp-for="ConfirmPassword" for="inputConfirmPassword"><i class="fas fa-key me-2"></i>Xác nhận mật khẩu</label>
+                                    <button type="button" class="btn toggle-password" tabindex="-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <span asp-validation-for="ConfirmPassword" class="field-validation-error"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary py-3">
+                                <i class="fas fa-user-plus me-2"></i> Đăng ký
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <div class="small">
+                        <a href="/Account/Login" class="btn-link">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại đăng nhập
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-3 text-white">
+                <small>Bản quyền &copy; Quản lý khu dân cư @DateTime.Now.Year</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+            togglePasswordButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentElement.querySelector('input');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        this.querySelector('i').classList.remove('fa-eye');
+                        this.querySelector('i').classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        this.querySelector('i').classList.remove('fa-eye-slash');
+                        this.querySelector('i').classList.add('fa-eye');
+                    }
+                });
+            });
+        });
+    </script>
+}

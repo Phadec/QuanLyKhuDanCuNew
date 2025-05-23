@@ -1,0 +1,93 @@
+@model QuanLyKhuDanCu.ViewModels.ThongBaoViewModel
+@{
+    ViewData["Title"] = "Tạo thông báo mới";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Tạo thông báo mới</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Thông báo</a></li>
+        <li class="breadcrumb-item active">Tạo mới</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-bullhorn mr-1"></i>
+            Thông tin thông báo
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="TieuDe" class="control-label">Tiêu đề:</label>
+                    <input asp-for="TieuDe" class="form-control" placeholder="Nhập tiêu đề thông báo..." />
+                    <span asp-validation-for="TieuDe" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="NoiDung" class="control-label">Nội dung:</label>
+                    <textarea asp-for="NoiDung" class="form-control" rows="8" placeholder="Nhập nội dung thông báo..."></textarea>
+                    <span asp-validation-for="NoiDung" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="DoiTuong" class="control-label">Đối tượng:</label>
+                            <select asp-for="DoiTuong" class="form-control">
+                                <option value="TatCa">Tất cả</option>
+                                <option value="Resident">Cư dân</option>
+                                <option value="Admin">Quản trị viên</option>
+                            </select>
+                            <span asp-validation-for="DoiTuong" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="NgayHetHan" class="control-label">Ngày hết hạn:</label>
+                            <input asp-for="NgayHetHan" class="form-control datepicker" type="date" />
+                            <span asp-validation-for="NgayHetHan" class="text-danger"></span>
+                            <small class="form-text text-muted">Để trống nếu thông báo không có thời hạn.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="FileDinhKem" class="control-label">File đính kèm:</label>
+                    <div class="custom-file">
+                        <input asp-for="FileDinhKem" class="custom-file-input" id="customFile" />
+                        <label class="custom-file-label" for="customFile">Chọn file...</label>
+                    </div>
+                    <small class="form-text text-muted">Bạn có thể đính kèm tệp tin để chia sẻ thông tin chi tiết.</small>
+                </div>
+
+                <div class="form-group form-check mt-3">
+                    <input asp-for="TrangThai" class="form-check-input" />
+                    <label asp-for="TrangThai" class="form-check-label">Hiển thị thông báo</label>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i> Lưu thông báo
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-times mr-1"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Update custom file input label with selected file name
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
+}

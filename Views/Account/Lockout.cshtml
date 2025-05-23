@@ -1,0 +1,24 @@
+@{
+    ViewData["Title"] = "Tài khoản bị khóa";
+    Layout = "_LayoutLogin";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                <div class="card-header">
+                    <h3 class="text-center font-weight-light my-4">Tài khoản bị khóa</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <p>Tài khoản của bạn đã bị khóa. Vui lòng thử lại sau hoặc liên hệ với quản trị viên.</p>
+                    </div>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <div class="small"><a asp-controller="Home" asp-action="Index">Trở về trang chủ</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

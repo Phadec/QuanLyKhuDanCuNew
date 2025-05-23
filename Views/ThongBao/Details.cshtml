@@ -1,0 +1,123 @@
+@model QuanLyKhuDanCu.Models.ThongBao
+@{
+    ViewData["Title"] = "Chi tiết thông báo";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Chi tiết thông báo</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Thông báo</a></li>
+        <li class="breadcrumb-item active">Chi tiết</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0 text-primary">
+                        <i class="fas fa-bullhorn mr-1"></i> @Model.TieuDe
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <small class="text-muted">
+                                    <i class="fas fa-user mr-1"></i> Người đăng: @Model.NguoiTao.HoTen
+                                </small>
+                            </div>
+                            <div>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-alt mr-1"></i> Ngày đăng: @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <small class="text-muted">
+                                    <i class="fas fa-users mr-1"></i> Đối tượng: 
+                                    @if (Model.DoiTuong == "TatCa")
+                                    {
+                                        <span class="badge badge-info">Tất cả</span>
+                                    }
+                                    else if (Model.DoiTuong == "Resident")
+                                    {
+                                        <span class="badge badge-primary">Cư dân</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Quản trị viên</span>
+                                    }
+                                </small>
+                            </div>
+                            <div>
+                                @if (Model.NgayHetHan.HasValue)
+                                {
+                                    <small class="text-muted">
+                                        <i class="fas fa-hourglass-end mr-1"></i> Hết hạn: @Model.NgayHetHan.Value.ToString("dd/MM/yyyy")
+                                        @if (Model.NgayHetHan.Value < DateTime.Now)
+                                        {
+                                            <span class="badge badge-secondary ml-1">Đã hết hạn</span>
+                                        }
+                                    </small>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">
+                                        <i class="fas fa-infinity mr-1"></i> Không có hạn
+                                    </small>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p>@Html.Raw(Model.NoiDung.Replace("\n", "<br />"))</p>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.FileDinhKem))
+                    {
+                        <div class="mt-3">
+                            <h6><i class="fas fa-paperclip mr-1"></i> File đính kèm:</h6>
+                            <div class="mt-2">
+                                <a asp-action="DownloadFile" asp-route-id="@Model.ThongBaoId" class="btn btn-outline-primary">
+                                    <i class="fas fa-download mr-1"></i> Tải xuống
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-cogs mr-1"></i>
+                    Thao tác
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary mb-2">
+                            <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách
+                        </a>
+                        
+                        @if (User.IsInRole("Admin") || (User.Identity.Name == Model.NguoiTao.UserName))
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.ThongBaoId" class="btn btn-primary mb-2">
+                                <i class="fas fa-edit mr-1"></i> Chỉnh sửa
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.ThongBaoId" class="btn btn-danger mb-2">
+                                <i class="fas fa-trash mr-1"></i> Xóa
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

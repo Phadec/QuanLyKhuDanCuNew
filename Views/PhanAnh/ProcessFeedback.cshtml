@@ -1,0 +1,101 @@
+@model QuanLyKhuDanCu.ViewModels.ProcessFeedbackViewModel
+@{
+    ViewData["Title"] = "Xử lý phản ánh";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Xử lý phản ánh</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý phản ánh</a></li>
+        <li class="breadcrumb-item active">Xử lý phản ánh</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Thông tin phản ánh
+                </div>
+                <div class="card-body">
+                    <h3 class="mb-3">@Model.TieuDe</h3>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p>
+                                <strong><i class="fas fa-user mr-1"></i> Người gửi:</strong> @Model.NguoiGui
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong><i class="fas fa-calendar-alt mr-1"></i> Ngày gửi:</strong> @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <p>
+                            <strong><i class="fas fa-info-circle mr-1"></i> Trạng thái hiện tại:</strong>
+                            @if (Model.TrangThai == "ChoXuLy")
+                            {
+                                <span class="badge badge-warning">Chờ xử lý</span>
+                            }
+                            else if (Model.TrangThai == "DangXuLy")
+                            {
+                                <span class="badge badge-primary">Đang xử lý</span>
+                            }
+                        </p>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">Nội dung phản ánh</div>
+                        <div class="card-body">
+                            <p>@Html.Raw(Model.NoiDung.Replace("\n", "<br />"))</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-reply mr-1"></i>
+                    Phản hồi
+                </div>
+                <div class="card-body">
+                    <form asp-action="ProcessFeedback" method="post">
+                        <input type="hidden" asp-for="PhanAnhId" />
+                        
+                        <div class="form-group">
+                            <label asp-for="Action" class="control-label">Trạng thái xử lý:</label>
+                            <select asp-for="Action" class="form-control">
+                                <option value="DangXuLy">Đang xử lý</option>
+                                <option value="DaXuLy">Đã xử lý</option>
+                            </select>
+                            <span asp-validation-for="Action" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="PhanHoi" class="control-label">Nội dung phản hồi:</label>
+                            <textarea asp-for="PhanHoi" class="form-control" rows="6" placeholder="Nhập phản hồi của bạn..."></textarea>
+                            <span asp-validation-for="PhanHoi" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-paper-plane mr-1"></i> Gửi phản hồi
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-block mt-2">
+                                <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

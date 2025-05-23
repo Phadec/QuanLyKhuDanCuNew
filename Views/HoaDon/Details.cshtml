@@ -1,0 +1,192 @@
+@model QuanLyKhuDanCu.Models.HoaDon
+@{
+    ViewData["Title"] = "Chi tiết hóa đơn";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Chi tiết hóa đơn</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+        {
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý hóa đơn</a></li>
+        }
+        else
+        {
+            <li class="breadcrumb-item"><a asp-action="MyInvoices">Hóa đơn của tôi</a></li>
+        }
+        <li class="breadcrumb-item active">Chi tiết hóa đơn</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-file-invoice mr-1"></i>
+                    Thông tin hóa đơn
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>Mã hóa đơn: @Model.MaHoaDon</h5>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            @if (Model.TrangThai == "ChuaThanhToan")
+                            {
+                                <span class="badge badge-warning px-3 py-2">Chưa thanh toán</span>
+                            }
+                            else if (Model.TrangThai == "DaThanhToan")
+                            {
+                                <span class="badge badge-success px-3 py-2">Đã thanh toán</span>
+                            }
+                            else if (Model.TrangThai == "QuaHan")
+                            {
+                                <span class="badge badge-danger px-3 py-2">Quá hạn</span>
+                            }
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Thông tin khách hàng</h6>
+                            <dl class="row">
+                                <dt class="col-sm-4">Mã hộ khẩu:</dt>
+                                <dd class="col-sm-8">
+                                    <a asp-controller="HoKhau" asp-action="Details" asp-route-id="@Model.HoKhauId">
+                                        @Model.HoKhau.MaHoKhau
+                                    </a>
+                                </dd>
+
+                                <dt class="col-sm-4">Chủ hộ:</dt>
+                                <dd class="col-sm-8">@Model.HoKhau.ChuHo.HoTen</dd>
+
+                                <dt class="col-sm-4">Địa chỉ:</dt>
+                                <dd class="col-sm-8">@Model.HoKhau.DiaChi</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Thông tin thanh toán</h6>
+                            <dl class="row">
+                                <dt class="col-sm-4">Ngày tạo:</dt>
+                                <dd class="col-sm-8">@Model.NgayTao.ToString("dd/MM/yyyy")</dd>
+
+                                <dt class="col-sm-4">Hạn thanh toán:</dt>
+                                <dd class="col-sm-8">@Model.HanThanhToan.ToString("dd/MM/yyyy")</dd>
+
+                                @if (Model.NgayThanhToan.HasValue)
+                                {
+                                    <dt class="col-sm-4">Ngày thanh toán:</dt>
+                                    <dd class="col-sm-8">@Model.NgayThanhToan.Value.ToString("dd/MM/yyyy")</dd>
+
+                                    <dt class="col-sm-4">Người thu:</dt>
+                                    <dd class="col-sm-8">@(Model.NguoiThu?.HoTen ?? "-")</dd>
+                                }
+                            </dl>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Chi tiết khoản phí</h6>
+                            <table class="table table-bordered">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Loại phí</th>
+                                        <th class="text-right">Số tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>@Model.LoaiPhi.TenLoaiPhi</td>
+                                        <td class="text-right">@Model.TongTien.ToString("N0") VNĐ</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Tổng cộng:</th>
+                                        <th class="text-right">@Model.TongTien.ToString("N0") VNĐ</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.GhiChu))
+                    {
+                        <div class="row">
+                            <div class="col-12">
+                                <h6>Ghi chú</h6>
+                                <p class="p-3 bg-light">@Model.GhiChu</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-cogs mr-1"></i>
+                    Thao tác
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+                        {
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-block mb-2">
+                                <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách
+                            </a>
+
+                            @if (Model.TrangThai != "DaThanhToan")
+                            {
+                                <a asp-action="Edit" asp-route-id="@Model.HoaDonId" class="btn btn-primary btn-block mb-2">
+                                    <i class="fas fa-edit mr-1"></i> Chỉnh sửa
+                                </a>
+                                
+                                <a asp-action="MarkAsPaid" asp-route-id="@Model.HoaDonId" class="btn btn-success btn-block mb-2">
+                                    <i class="fas fa-check-circle mr-1"></i> Đánh dấu đã thanh toán
+                                </a>
+                                
+                                <a asp-action="Delete" asp-route-id="@Model.HoaDonId" class="btn btn-danger btn-block">
+                                    <i class="fas fa-trash mr-1"></i> Xóa
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            <a asp-action="MyInvoices" class="btn btn-outline-secondary btn-block mb-2">
+                                <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách
+                            </a>
+                            
+                            @if (Model.TrangThai != "DaThanhToan")
+                            {
+                                <a href="#" class="btn btn-success btn-block" onclick="alert('Chức năng thanh toán trực tuyến đang được phát triển.')">
+                                    <i class="fas fa-credit-card mr-1"></i> Thanh toán trực tuyến
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.TrangThai == "QuaHan")
+            {
+                <div class="card mb-4 border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        Thông báo
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Hóa đơn này đã quá hạn thanh toán!</strong></p>
+                        <p>Vui lòng thanh toán sớm để không bị phát sinh thêm phí phạt.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,142 @@
+@model QuanLyKhuDanCu.ViewModels.TamTruTamVangViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký tạm trú/tạm vắng";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-edit me-1"></i>
+                Thông tin đăng ký
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="NhanKhauId" class="form-label">Nhân khẩu</label>
+                        <select asp-for="NhanKhauId" class="form-control form-select" asp-items="ViewBag.NhanKhauId">
+                            <option value="">-- Chọn nhân khẩu --</option>
+                        </select>
+                        <span asp-validation-for="NhanKhauId" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="LoaiDon" class="form-label">Loại đơn</label>
+                        <select asp-for="LoaiDon" class="form-control form-select">
+                            <option value="">-- Chọn loại đơn --</option>
+                            <option value="TamTru">Tạm trú</option>
+                            <option value="TamVang">Tạm vắng</option>
+                        </select>
+                        <span asp-validation-for="LoaiDon" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="NgayBatDau" class="form-label">Ngày bắt đầu</label>
+                        <input asp-for="NgayBatDau" type="date" class="form-control" />
+                        <span asp-validation-for="NgayBatDau" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="NgayKetThuc" class="form-label">Ngày kết thúc</label>
+                        <input asp-for="NgayKetThuc" type="date" class="form-control" />
+                        <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="LyDo" class="form-label">Lý do</label>
+                        <textarea asp-for="LyDo" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="LyDo" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="DiaChiTamTruTamVang" class="form-label">Địa chỉ tạm trú/tạm vắng</label>
+                        <textarea asp-for="DiaChiTamTruTamVang" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="DiaChiTamTruTamVang" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="GhiChu" class="form-label">Ghi chú</label>
+                        <textarea asp-for="GhiChu" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="GhiChu" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Lưu
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-info-circle me-1"></i>
+                Thông tin hướng dẫn
+            </div>
+            <div class="card-body">
+                <p>Đăng ký thông tin tạm trú/tạm vắng:</p>
+                <ul>
+                    <li><strong>Tạm trú:</strong> Khi công dân từ nơi khác đến cư trú tại địa phương.</li>
+                    <li><strong>Tạm vắng:</strong> Khi công dân rời khỏi nơi thường trú để đến nơi khác.</li>
+                </ul>
+                <p>Cần cung cấp đầy đủ các thông tin:</p>
+                <ul>
+                    <li>Thời gian bắt đầu và kết thúc</li>
+                    <li>Lý do tạm trú/tạm vắng</li>
+                    <li>Địa chỉ nơi tạm trú hoặc đến tạm vắng</li>
+                </ul>
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-exclamation-circle me-1"></i>
+                    Lưu ý: Đơn đăng ký sẽ được xem xét bởi cán bộ phụ trách trước khi được chấp thuận.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Add date validation
+            $("#NgayBatDau").change(function() {
+                var startDate = new Date($(this).val());
+                var today = new Date();
+                
+                if (startDate < today) {
+                    // Allow dates from today
+                    $(this).val(today.toISOString().split('T')[0]);
+                }
+                
+                // Update minimum end date
+                var endDateInput = $("#NgayKetThuc");
+                var endDate = new Date(endDateInput.val());
+                
+                if (endDate <= startDate) {
+                    // Set end date to start date + 1 day
+                    var newEndDate = new Date(startDate);
+                    newEndDate.setDate(newEndDate.getDate() + 1);
+                    endDateInput.val(newEndDate.toISOString().split('T')[0]);
+                }
+                
+                endDateInput.attr("min", startDate.toISOString().split('T')[0]);
+            });
+            
+            // Initialize the end date constraint
+            if ($("#NgayBatDau").val()) {
+                $("#NgayKetThuc").attr("min", $("#NgayBatDau").val());
+            }
+        });
+    </script>
+}

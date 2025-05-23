@@ -1,0 +1,79 @@
+@model QuanLyKhuDanCu.Models.ThongBao
+@{
+    ViewData["Title"] = "Xóa thông báo";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Xóa thông báo</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Thông báo</a></li>
+        <li class="breadcrumb-item active">Xóa</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            Xác nhận xóa
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger">
+                <h4><i class="fas fa-exclamation-circle mr-1"></i> Bạn có chắc chắn muốn xóa thông báo này?</h4>
+                <p>Hành động này không thể hoàn tác.</p>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">Thông tin thông báo</div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Tiêu đề:</dt>
+                        <dd class="col-sm-9">@Model.TieuDe</dd>
+
+                        <dt class="col-sm-3">Người tạo:</dt>
+                        <dd class="col-sm-9">@Model.NguoiTao.HoTen</dd>
+
+                        <dt class="col-sm-3">Ngày tạo:</dt>
+                        <dd class="col-sm-9">@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-3">Đối tượng:</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.DoiTuong == "TatCa")
+                            {
+                                <span class="badge badge-info">Tất cả</span>
+                            }
+                            else if (Model.DoiTuong == "Resident")
+                            {
+                                <span class="badge badge-primary">Cư dân</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Quản trị viên</span>
+                            }
+                        </dd>
+
+                        @if (Model.NgayHetHan.HasValue)
+                        {
+                            <dt class="col-sm-3">Ngày hết hạn:</dt>
+                            <dd class="col-sm-9">@Model.NgayHetHan.Value.ToString("dd/MM/yyyy")</dd>
+                        }
+
+                        <dt class="col-sm-3">Trạng thái:</dt>
+                        <dd class="col-sm-9">@(Model.TrangThai ? "Hiển thị" : "Ẩn")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="ThongBaoId" />
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash mr-1"></i> Xóa
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

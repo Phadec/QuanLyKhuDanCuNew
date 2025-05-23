@@ -1,0 +1,146 @@
+@model QuanLyKhuDanCu.Helpers.PaginatedList<QuanLyKhuDanCu.Models.YeuCauDichVu>
+@{
+    ViewData["Title"] = "Quản lý yêu cầu dịch vụ";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Quản lý yêu cầu dịch vụ</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item active">Yêu cầu dịch vụ</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-table me-1"></i> Danh sách yêu cầu dịch vụ
+            </div>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Tạo mới
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <form asp-action="Index" method="get" class="d-flex">
+                        <div class="input-group me-2">
+                            <input type="text" name="searchString" class="form-control" placeholder="Tìm kiếm..." value="@Context.Request.Query["searchString"]">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <select name="status" class="form-select" onchange="this.form.submit()" style="width: auto;">
+                            @foreach (var item in (SelectList)ViewData["Status"])
+                            {
+                                <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                            }
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Dịch vụ</th>
+                            <th>Người yêu cầu</th>
+                            <th>Ngày yêu cầu</th>
+                            <th>Trạng thái</th>
+                            <th>Người xử lý</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.DichVu.TenDichVu</td>
+                                <td>@item.User.HoTen</td>
+                                <td>@item.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (item.TrangThai == "ChoXuLy")
+                                    {
+                                        <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                                    }
+                                    else if (item.TrangThai == "DangXuLy")
+                                    {
+                                        <span class="badge bg-primary">Đang xử lý</span>
+                                    }
+                                    else if (item.TrangThai == "DaHoanThanh")
+                                    {
+                                        <span class="badge bg-success">Đã hoàn thành</span>
+                                    }
+                                    else if (item.TrangThai == "TuChoi")
+                                    {
+                                        <span class="badge bg-danger">Từ chối</span>
+                                    }
+                                </td>
+                                <td>
+                                    @(item.NguoiXuLy?.HoTen ?? "-")
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.YeuCauDichVuId" class="btn btn-sm btn-info" title="Chi tiết">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                        @if (item.TrangThai == "ChoXuLy" || item.TrangThai == "DangXuLy")
+                                        {
+                                            <a asp-action="ProcessRequest" asp-route-id="@item.YeuCauDichVuId" class="btn btn-sm btn-primary" title="Xử lý">
+                                                <i class="fas fa-cogs"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @{
+                var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+                var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+                var currentFilter = Context.Request.Query["searchString"].ToString();
+                var currentStatus = Context.Request.Query["status"].ToString();
+            }
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @prevDisabled">
+                        <a asp-action="Index"
+                           asp-route-page="@(Model.PageIndex - 1)"
+                           asp-route-searchString="@currentFilter"
+                           asp-route-status="@currentStatus"
+                           class="page-link @prevDisabled">
+                            <i class="fas fa-angle-left"></i> Trước
+                        </a>
+                    </li>
+
+                    @for (var i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(Model.PageIndex == i ? "active" : "")">
+                            <a asp-action="Index"
+                               asp-route-page="@i"
+                               asp-route-searchString="@currentFilter"
+                               asp-route-status="@currentStatus"
+                               class="page-link">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    <li class="page-item @nextDisabled">
+                        <a asp-action="Index"
+                           asp-route-page="@(Model.PageIndex + 1)"
+                           asp-route-searchString="@currentFilter"
+                           asp-route-status="@currentStatus"
+                           class="page-link @nextDisabled">
+                            Tiếp <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>

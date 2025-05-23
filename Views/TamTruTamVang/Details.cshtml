@@ -1,0 +1,142 @@
+@model QuanLyKhuDanCu.Models.TamTruTamVang
+@{
+    ViewData["Title"] = "Chi tiết tạm trú/tạm vắng";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Chi tiết tạm trú/tạm vắng</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+        {
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý tạm trú/tạm vắng</a></li>
+        }
+        else
+        {
+            <li class="breadcrumb-item"><a asp-action="MyRequests">Đơn của tôi</a></li>
+        }
+        <li class="breadcrumb-item active">Chi tiết</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Thông tin đơn @(Model.LoaiDon == "TamTru" ? "tạm trú" : "tạm vắng")
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Nhân khẩu:</dt>
+                        <dd class="col-sm-8">@(Model.NhanKhau?.HoTen ?? "Không có")</dd>
+
+                        <dt class="col-sm-4">Loại đơn:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.LoaiDon == "TamTru")
+                            {
+                                <span class="badge badge-primary">Tạm trú</span>
+                            }
+                            else if (Model.LoaiDon == "TamVang")
+                            {
+                                <span class="badge badge-info">Tạm vắng</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Thời gian:</dt>
+                        <dd class="col-sm-8">@Model.NgayBatDau.ToString("dd/MM/yyyy") - @Model.NgayKetThuc.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Địa chỉ:</dt>
+                        <dd class="col-sm-8">@Model.DiaChiTamTruTamVang</dd>
+
+                        <dt class="col-sm-4">Lý do:</dt>
+                        <dd class="col-sm-8">@Model.LyDo</dd>
+
+                        <dt class="col-sm-4">Ngày tạo đơn:</dt>
+                        <dd class="col-sm-8">@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.TrangThai == "ChoXuLy")
+                            {
+                                <span class="badge badge-warning">Chờ xử lý</span>
+                            }
+                            else if (Model.TrangThai == "DaXuLy")
+                            {
+                                <span class="badge badge-success">Đã xử lý</span>
+                            }
+                            else if (Model.TrangThai == "TuChoi")
+                            {
+                                <span class="badge badge-danger">Từ chối</span>
+                            }
+                            else if (Model.TrangThai == "ChoDuyet")
+                            {
+                                <span class="badge badge-primary">Chờ duyệt</span>
+                            }
+                            else if (Model.TrangThai == "DaDuyet")
+                            {
+                                <span class="badge badge-success">Đã duyệt</span>
+                            }
+                        </dd>
+
+                        @if (Model.NgayDuyet.HasValue)
+                        {
+                            <dt class="col-sm-4">Ngày duyệt:</dt>
+                            <dd class="col-sm-8">@Model.NgayDuyet.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                        }
+
+                        @if (Model.NguoiDuyet != null)
+                        {
+                            <dt class="col-sm-4">Người duyệt:</dt>
+                            <dd class="col-sm-8">@Model.NguoiDuyet?.HoTen</dd>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.GhiChu))
+                        {
+                            <dt class="col-sm-4">Ghi chú:</dt>
+                            <dd class="col-sm-8">@Model.GhiChu</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-tasks mr-1"></i>
+                    Thao tác
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+                        {
+                            <a asp-action="Index" class="btn btn-outline-secondary mb-2">
+                                <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách
+                            </a>
+                            
+                            @if (Model.TrangThai == "ChoDuyet")
+                            {
+                                <a asp-action="Approve" asp-route-id="@Model.Id" class="btn btn-success mb-2">
+                                    <i class="fas fa-check mr-1"></i> Duyệt đơn
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            <a asp-action="MyRequests" class="btn btn-outline-secondary mb-2">
+                                <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách
+                            </a>
+                        }
+                        
+                        @if (User.IsInRole("Admin") || (Model.TrangThai == "ChoXuLy" || Model.TrangThai == "ChoDuyet"))
+                        {
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger mb-2">
+                                <i class="fas fa-trash mr-1"></i> Xóa
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

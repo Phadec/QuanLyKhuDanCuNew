@@ -1,0 +1,88 @@
+@model IEnumerable<QuanLyKhuDanCu.Models.YeuCauDichVu>
+@{
+    ViewData["Title"] = "Yêu cầu dịch vụ của tôi";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Yêu cầu dịch vụ của tôi</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item active">Yêu cầu dịch vụ của tôi</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-list me-1"></i> Danh sách yêu cầu
+            </div>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Tạo yêu cầu mới
+            </a>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-1"></i> Bạn chưa có yêu cầu dịch vụ nào.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Dịch vụ</th>
+                                <th>Ngày yêu cầu</th>
+                                <th>Nội dung</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.DichVu.TenDichVu</td>
+                                    <td>@item.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@(item.NoiDung.Length > 50 ? item.NoiDung.Substring(0, 50) + "..." : item.NoiDung)</td>
+                                    <td>
+                                        @if (item.TrangThai == "ChoXuLy")
+                                        {
+                                            <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                                        }
+                                        else if (item.TrangThai == "DangXuLy")
+                                        {
+                                            <span class="badge bg-primary">Đang xử lý</span>
+                                        }
+                                        else if (item.TrangThai == "DaHoanThanh")
+                                        {
+                                            <span class="badge bg-success">Đã hoàn thành</span>
+                                        }
+                                        else if (item.TrangThai == "TuChoi")
+                                        {
+                                            <span class="badge bg-danger">Từ chối</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.YeuCauDichVuId" class="btn btn-sm btn-info">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                            @if (item.TrangThai == "ChoXuLy")
+                                            {
+                                                <a asp-action="Cancel" asp-route-id="@item.YeuCauDichVuId" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,82 @@
+@model QuanLyKhuDanCu.ViewModels.PhanAnhViewModel
+@{
+    ViewData["Title"] = "Gửi phản ánh";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Gửi phản ánh</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        @if (User.IsInRole("Resident"))
+        {
+            <li class="breadcrumb-item"><a asp-action="MyFeedback">Phản ánh của tôi</a></li>
+        }
+        else
+        {
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý phản ánh</a></li>
+        }
+        <li class="breadcrumb-item active">Gửi phản ánh</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-edit mr-1"></i>
+            Thông tin phản ánh
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="TieuDe" class="control-label">Tiêu đề:</label>
+                    <input asp-for="TieuDe" class="form-control" placeholder="Nhập tiêu đề phản ánh..." />
+                    <span asp-validation-for="TieuDe" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="NoiDung" class="control-label">Nội dung:</label>
+                    <textarea asp-for="NoiDung" class="form-control" rows="6" placeholder="Mô tả chi tiết phản ánh của bạn..."></textarea>
+                    <span asp-validation-for="NoiDung" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="FileDinhKem" class="control-label">File đính kèm:</label>
+                    <div class="custom-file">
+                        <input asp-for="FileDinhKem" class="custom-file-input" id="customFile" />
+                        <label class="custom-file-label" for="customFile">Chọn file...</label>
+                    </div>
+                    <small class="form-text text-muted">Bạn có thể đính kèm ảnh, tài liệu hoặc các file khác liên quan đến phản ánh.</small>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane mr-1"></i> Gửi phản ánh
+                    </button>
+                    @if (User.IsInRole("Resident"))
+                    {
+                        <a asp-action="MyFeedback" class="btn btn-outline-secondary">
+                            <i class="fas fa-times mr-1"></i> Hủy
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-times mr-1"></i> Hủy
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Update custom file input label with selected file name
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
+}

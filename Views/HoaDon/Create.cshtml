@@ -1,0 +1,103 @@
+@model QuanLyKhuDanCu.ViewModels.HoaDonViewModel
+@{
+    ViewData["Title"] = "Tạo hóa đơn mới";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Tạo hóa đơn mới</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý hóa đơn</a></li>
+        <li class="breadcrumb-item active">Tạo mới</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-file-invoice-dollar mr-1"></i>
+            Thông tin hóa đơn
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="HoKhauId" class="control-label">Hộ khẩu:</label>
+                            <select asp-for="HoKhauId" class="form-control" asp-items="ViewBag.HoKhauId"></select>
+                            <span asp-validation-for="HoKhauId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="LoaiPhiId" class="control-label">Loại phí:</label>
+                            <select asp-for="LoaiPhiId" class="form-control" asp-items="ViewBag.LoaiPhiId"></select>
+                            <span asp-validation-for="LoaiPhiId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="TongTien" class="control-label">Tổng tiền:</label>
+                            <div class="input-group">
+                                <input asp-for="TongTien" class="form-control currency-input" placeholder="Để trống sẽ lấy mức phí mặc định" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                            </div>
+                            <span asp-validation-for="TongTien" class="text-danger"></span>
+                            <small class="form-text text-muted">Để trống sẽ lấy mức phí mặc định của loại phí đã chọn.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="HanThanhToan" class="control-label">Hạn thanh toán:</label>
+                            <input asp-for="HanThanhToan" class="form-control datepicker" type="date" />
+                            <span asp-validation-for="HanThanhToan" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="GhiChu" class="control-label">Ghi chú:</label>
+                    <textarea asp-for="GhiChu" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="GhiChu" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i> Lưu
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            // Format currency input
+            $('.currency-input').on('input', function () {
+                const value = $(this).val().replace(/,/g, '');
+                if (value !== '') {
+                    const formattedValue = new Intl.NumberFormat('vi-VN').format(value);
+                    $(this).val(formattedValue);
+                }
+            });
+
+            // Update total amount when loai phi changes
+            $('#LoaiPhiId').on('change', function () {
+                // In a real application, you would make an AJAX call to get the default amount for this fee type
+                // For now, we'll just clear the current value to use the default
+                $('#TongTien').val('');
+            });
+        });
+    </script>
+}

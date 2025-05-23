@@ -1,0 +1,106 @@
+@model IEnumerable<QuanLyKhuDanCu.Models.TamTruTamVang>
+@{
+    ViewData["Title"] = "Đơn tạm trú/tạm vắng của tôi";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Đơn tạm trú/tạm vắng của tôi</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item active">Đơn tạm trú/tạm vắng</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-list mr-1"></i>
+                Danh sách đơn của tôi
+            </div>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Tạo đơn mới
+            </a>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-1"></i> Bạn chưa có đơn tạm trú/tạm vắng nào.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Nhân khẩu</th>
+                                <th>Loại đơn</th>
+                                <th>Thời gian</th>
+                                <th>Địa chỉ</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@(item.NhanKhau?.HoTen ?? "Không có")</td>
+                                    <td>
+                                        @if (item.LoaiDon == "TamTru")
+                                        {
+                                            <span class="badge badge-primary">Tạm trú</span>
+                                        }
+                                        else if (item.LoaiDon == "TamVang")
+                                        {
+                                            <span class="badge badge-info">Tạm vắng</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @item.NgayBatDau.ToString("dd/MM/yyyy") - @item.NgayKetThuc.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td>@item.DiaChiTamTruTamVang</td>
+                                    <td>
+                                        @if (item.TrangThai == "ChoXuLy")
+                                        {
+                                            <span class="badge badge-warning">Chờ xử lý</span>
+                                        }
+                                        else if (item.TrangThai == "DaXuLy")
+                                        {
+                                            <span class="badge badge-success">Đã xử lý</span>
+                                        }
+                                        else if (item.TrangThai == "TuChoi")
+                                        {
+                                            <span class="badge badge-danger">Từ chối</span>
+                                        }
+                                        else if (item.TrangThai == "ChoDuyet")
+                                        {
+                                            <span class="badge badge-primary">Chờ duyệt</span>
+                                        }
+                                        else if (item.TrangThai == "DaDuyet")
+                                        {
+                                            <span class="badge badge-success">Đã duyệt</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Chi tiết">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                            @if (item.TrangThai == "ChoXuLy" || item.TrangThai == "ChoDuyet")
+                                            {
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Xóa">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

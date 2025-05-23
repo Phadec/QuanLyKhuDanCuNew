@@ -1,0 +1,111 @@
+@model QuanLyKhuDanCu.ViewModels.YeuCauDichVuViewModel
+@{
+    ViewData["Title"] = "Tạo yêu cầu dịch vụ";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Tạo yêu cầu dịch vụ</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+        {
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý yêu cầu dịch vụ</a></li>
+        }
+        else
+        {
+            <li class="breadcrumb-item"><a asp-action="MyRequests">Yêu cầu của tôi</a></li>
+        }
+        <li class="breadcrumb-item active">Tạo mới</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-edit me-1"></i>
+                    Thông tin yêu cầu dịch vụ
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        @if (ViewData["IsStaff"] != null && (bool)ViewData["IsStaff"])
+                        {
+                            <div class="form-group mb-3">
+                                <label asp-for="UserId" class="form-label">Người yêu cầu</label>
+                                <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId">
+                                    <option value="">-- Chọn người yêu cầu --</option>
+                                </select>
+                                <span asp-validation-for="UserId" class="text-danger"></span>
+                                <div class="form-text">Chọn cư dân để tạo yêu cầu thay mặt họ</div>
+                            </div>
+                        }
+
+                        <div class="form-group mb-3">
+                            <label asp-for="DichVuId" class="form-label">Dịch vụ</label>
+                            <select asp-for="DichVuId" class="form-select" asp-items="ViewBag.DichVuId">
+                                <option value="">-- Chọn dịch vụ --</option>
+                            </select>
+                            <span asp-validation-for="DichVuId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="NoiDung" class="form-label">Nội dung yêu cầu</label>
+                            <textarea asp-for="NoiDung" class="form-control" rows="5" placeholder="Mô tả chi tiết yêu cầu dịch vụ của bạn..."></textarea>
+                            <span asp-validation-for="NoiDung" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="GhiChu" class="form-label">Ghi chú</label>
+                            <textarea asp-for="GhiChu" class="form-control" rows="3" placeholder="Thông tin bổ sung (nếu có)"></textarea>
+                            <span asp-validation-for="GhiChu" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Lưu yêu cầu
+                            </button>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+                            {
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-action="MyRequests" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+                                </a>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Hướng dẫn
+                </div>
+                <div class="card-body">
+                    <h5>Yêu cầu dịch vụ</h5>
+                    <p>Để gửi yêu cầu dịch vụ, vui lòng làm theo các bước sau:</p>
+                    <ol>
+                        <li>Chọn loại dịch vụ bạn cần</li>
+                        <li>Mô tả chi tiết yêu cầu của bạn</li>
+                        <li>Cung cấp bất kỳ thông tin bổ sung cần thiết</li>
+                    </ol>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-exclamation-circle me-1"></i> Yêu cầu của bạn sẽ được xử lý trong vòng 24-48 giờ làm việc.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

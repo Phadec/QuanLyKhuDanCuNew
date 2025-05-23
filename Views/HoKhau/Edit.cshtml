@@ -1,0 +1,88 @@
+@model QuanLyKhuDanCu.ViewModels.HoKhauViewModel
+
+@{
+    ViewData["Title"] = "Sửa hộ khẩu";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-edit me-1"></i>
+                Cập nhật thông tin hộ khẩu
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="HoKhauId" />
+
+                    <div class="form-group mb-3">
+                        <label asp-for="MaHoKhau" class="form-label"></label>
+                        <input asp-for="MaHoKhau" class="form-control" />
+                        <span asp-validation-for="MaHoKhau" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="DiaChi" class="form-label"></label>
+                        <textarea asp-for="DiaChi" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="DiaChi" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="ChuHoId" class="form-label"></label>
+                        <select asp-for="ChuHoId" class="form-control" asp-items="ViewBag.ChuHoId"></select>
+                        <span asp-validation-for="ChuHoId" class="text-danger"></span>
+                        <small class="form-text text-muted">Nếu thay đổi chủ hộ, bạn cần cập nhật quan hệ của các nhân khẩu với chủ hộ mới</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="GhiChu" class="form-label"></label>
+                        <textarea asp-for="GhiChu" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="GhiChu" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group form-check mb-3">
+                        <input asp-for="TrangThai" class="form-check-input" />
+                        <label asp-for="TrangThai" class="form-check-label"></label>
+                        <small class="form-text text-muted d-block">Hộ khẩu không hoạt động sẽ không thể thêm nhân khẩu mới</small>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Lưu thay đổi
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-info-circle me-1"></i>
+                Lưu ý quan trọng
+            </div>
+            <div class="card-body">
+                <p>Khi cập nhật thông tin hộ khẩu:</p>
+                <ul>
+                    <li>Thay đổi chủ hộ sẽ ảnh hưởng đến các quan hệ nhân khẩu trong hộ</li>
+                    <li>Nếu vô hiệu hóa hộ khẩu, tất cả nhân khẩu trong hộ vẫn được giữ nguyên</li>
+                    <li>Mã hộ khẩu phải là duy nhất trong hệ thống</li>
+                </ul>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Thận trọng khi thay đổi thông tin quan trọng như chủ hộ hoặc trạng thái
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

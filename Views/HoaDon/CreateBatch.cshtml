@@ -1,0 +1,134 @@
+@model QuanLyKhuDanCu.ViewModels.BatchInvoiceViewModel
+@{
+    ViewData["Title"] = "Tạo loạt hóa đơn";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Tạo loạt hóa đơn</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý hóa đơn</a></li>
+        <li class="breadcrumb-item active">Tạo loạt hóa đơn</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-file-invoice-dollar mr-1"></i>
+                    Thông tin loạt hóa đơn
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle mr-1"></i> Tạo hóa đơn cho tất cả hộ khẩu</h5>
+                        <p>Chức năng này sẽ tạo hóa đơn cho tất cả các hộ khẩu hiện đang hoạt động trong hệ thống. Hãy kiểm tra kỹ thông tin trước khi xác nhận.</p>
+                    </div>
+
+                    <form asp-action="CreateBatch" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group">
+                            <label asp-for="LoaiPhiId" class="control-label">Loại phí:</label>
+                            <select asp-for="LoaiPhiId" class="form-control" asp-items="ViewBag.LoaiPhiId"></select>
+                            <span asp-validation-for="LoaiPhiId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="CustomAmount" class="control-label">Số tiền tùy chỉnh:</label>
+                            <div class="input-group">
+                                <input asp-for="CustomAmount" class="form-control currency-input" placeholder="Để trống sẽ lấy mức phí mặc định" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                            </div>
+                            <span asp-validation-for="CustomAmount" class="text-danger"></span>
+                            <small class="form-text text-muted">Để trống sẽ lấy mức phí mặc định của loại phí đã chọn.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="DueDate" class="control-label">Hạn thanh toán:</label>
+                            <input asp-for="DueDate" class="form-control datepicker" type="date" />
+                            <span asp-validation-for="DueDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label">Mô tả:</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Mô tả chung cho tất cả hóa đơn"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-save mr-1"></i> Tạo loạt hóa đơn
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Thông tin bổ sung
+                </div>
+                <div class="card-body">
+                    <h6>Quy trình tạo loạt hóa đơn:</h6>
+                    <ol>
+                        <li>Chọn loại phí cần thu</li>
+                        <li>Nhập số tiền tùy chỉnh (nếu cần)</li>
+                        <li>Chọn hạn thanh toán</li>
+                        <li>Nhập mô tả chung cho tất cả hóa đơn</li>
+                        <li>Xác nhận tạo loạt hóa đơn</li>
+                    </ol>
+                    <hr />
+                    <h6>Lưu ý:</h6>
+                    <ul>
+                        <li>Hệ thống sẽ tạo hóa đơn cho tất cả hộ khẩu đang hoạt động</li>
+                        <li>Số tiền tùy chỉnh sẽ được áp dụng cho tất cả hóa đơn</li>
+                        <li>Nếu không nhập số tiền tùy chỉnh, hệ thống sẽ sử dụng mức phí mặc định</li>
+                        <li>Sau khi tạo, bạn có thể chỉnh sửa từng hóa đơn riêng nếu cần</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            // Format currency input
+            $('.currency-input').on('input', function () {
+                const value = $(this).val().replace(/,/g, '');
+                if (value !== '') {
+                    const formattedValue = new Intl.NumberFormat('vi-VN').format(value);
+                    $(this).val(formattedValue);
+                }
+            });
+
+            // Confirm batch creation
+            $('form').on('submit', function (e) {
+                if (!confirm('Bạn có chắc chắn muốn tạo hóa đơn cho tất cả hộ khẩu?')) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Show loading indicator
+                $('#submitBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
+            });
+
+            // Update fee amount when selecting fee type
+            $('#LoaiPhiId').on('change', function () {
+                // In a real application, you would make an AJAX call to get the default amount for this fee type
+                // For now, we'll just clear the current value to use the default
+                $('#CustomAmount').val('');
+            });
+        });
+    </script>
+}
