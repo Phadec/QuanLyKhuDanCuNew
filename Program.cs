@@ -23,7 +23,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("RequireManagerRole", policy => policy.RequireRole("Manager"));
+    options.AddPolicy("RequireManagerRole", policy => policy.RequireRole("Admin", "Manager"));
     options.AddPolicy("RequireStaffRole", policy => 
         policy.RequireRole("Admin", "Manager", "Staff"));
 });

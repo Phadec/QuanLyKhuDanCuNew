@@ -13,10 +13,8 @@ namespace QuanLyKhuDanCu.ViewModels
 
         [Required(ErrorMessage = "Loại phí là bắt buộc")]
         [Display(Name = "Loại phí")]
-        public int LoaiPhiId { get; set; }
-
-        [Display(Name = "Mã hóa đơn")]
-        public string MaHoaDon { get; set; }
+        public int LoaiPhiId { get; set; }        [Display(Name = "Mã hóa đơn")]
+        public string? MaHoaDon { get; set; }
 
         [Display(Name = "Tổng tiền")]
         [DataType(DataType.Currency)]

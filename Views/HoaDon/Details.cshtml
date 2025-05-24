@@ -49,21 +49,45 @@
                     <hr />
 
                     <div class="row">
-                        <div class="col-md-6">
-                            <h6>Thông tin khách hàng</h6>
+                        <div class="col-md-6">                            <h6>Thông tin khách hàng</h6>
                             <dl class="row">
                                 <dt class="col-sm-4">Mã hộ khẩu:</dt>
                                 <dd class="col-sm-8">
-                                    <a asp-controller="HoKhau" asp-action="Details" asp-route-id="@Model.HoKhauId">
-                                        @Model.HoKhau.MaHoKhau
-                                    </a>
+                                    @if (Model.HoKhau != null)
+                                    {
+                                        <a asp-controller="HoKhau" asp-action="Details" asp-route-id="@Model.HoKhauId">
+                                            @Model.HoKhau.MaHoKhau
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không xác định</span>
+                                    }
                                 </dd>
 
                                 <dt class="col-sm-4">Chủ hộ:</dt>
-                                <dd class="col-sm-8">@Model.HoKhau.ChuHo.HoTen</dd>
+                                <dd class="col-sm-8">
+                                    @if (Model.HoKhau?.ChuHo != null)
+                                    {
+                                        @Model.HoKhau.ChuHo.HoTen
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không xác định</span>
+                                    }
+                                </dd>
 
                                 <dt class="col-sm-4">Địa chỉ:</dt>
-                                <dd class="col-sm-8">@Model.HoKhau.DiaChi</dd>
+                                <dd class="col-sm-8">
+                                    @if (Model.HoKhau != null)
+                                    {
+                                        @Model.HoKhau.DiaChi
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không xác định</span>
+                                    }
+                                </dd>
                             </dl>
                         </div>
                         <div class="col-md-6">
@@ -98,10 +122,18 @@
                                         <th>Loại phí</th>
                                         <th class="text-right">Số tiền</th>
                                     </tr>
-                                </thead>
-                                <tbody>
+                                </thead>                                <tbody>
                                     <tr>
-                                        <td>@Model.LoaiPhi.TenLoaiPhi</td>
+                                        <td>
+                                            @if (Model.LoaiPhi != null)
+                                            {
+                                                @Model.LoaiPhi.TenLoaiPhi
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Không xác định</span>
+                                            }
+                                        </td>
                                         <td class="text-right">@Model.TongTien.ToString("N0") VNĐ</td>
                                     </tr>
                                 </tbody>

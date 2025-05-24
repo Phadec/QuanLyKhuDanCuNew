@@ -1,0 +1,257 @@
+@model QuanLyKhuDanCu.ViewModels.ThongKeYeuCauDichVuViewModel
+@{
+    ViewData["Title"] = "Thống kê yêu cầu dịch vụ";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Thống kê yêu cầu dịch vụ năm @Model.Year</h1>
+        <div class="btn-group" role="group">
+            <a asp-action="Index" class="btn btn-outline-secondary">Tổng quan</a>
+            <a asp-action="DanCu" class="btn btn-outline-primary">Dân cư</a>
+            <a asp-action="ThuPhi" class="btn btn-outline-primary">Thu phí</a>
+            <a asp-action="YeuCauDichVu" class="btn btn-primary">Yêu cầu dịch vụ</a>
+        </div>
+    </div>
+
+    <!-- Year Selection -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <form method="get">
+                <div class="form-group">
+                    <label for="year">Chọn năm:</label>
+                    <select class="form-control" id="year" name="year" onchange="this.form.submit()">                        @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 5; i--)
+                        {
+                            <option value="@i" selected="@(i == Model.Year)">@i</option>
+                        }
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Tổng số yêu cầu -->
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng số yêu cầu năm @Model.Year</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TongSoYeuCau</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-concierge-bell fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thời gian xử lý trung bình -->
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Thời gian xử lý trung bình</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.ThoiGianXuLyTrungBinh.ToString("F1") ngày</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Biểu đồ yêu cầu theo tháng -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Yêu cầu dịch vụ theo tháng</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống kê trạng thái -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Trạng thái xử lý</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        @foreach (var item in Model.YeuCauTheoTrangThai)
+                        {
+                            <span class="mr-2">
+                                <i class="fas fa-circle 
+                                   @(item.Key == "Đã hoàn thành" ? "text-success" : 
+                                     item.Key == "Đang xử lý" ? "text-warning" : 
+                                     item.Key == "Chờ xử lý" ? "text-info" : "text-danger")"></i> 
+                                @item.Key: @item.Value
+                            </span>
+                            <br />
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Yêu cầu theo dịch vụ -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Yêu cầu theo loại dịch vụ</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="serviceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Yêu cầu gần đây -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Yêu cầu gần đây</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Người yêu cầu</th>
+                                    <th>Dịch vụ</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày yêu cầu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.YeuCauGanDay)
+                                {
+                                    <tr>
+                                        <td>@item.User?.HoTen</td>
+                                        <td>@item.DichVu?.TenDichVu</td>
+                                        <td>
+                                            <span class="badge 
+                                                @(item.TrangThai == "DaHoanThanh" ? "badge-success" : 
+                                                  item.TrangThai == "DangXuLy" ? "badge-warning" : 
+                                                  item.TrangThai == "ChoXuLy" ? "badge-info" : "badge-danger")">
+                                                @(item.TrangThai == "DaHoanThanh" ? "Đã hoàn thành" : 
+                                                  item.TrangThai == "DangXuLy" ? "Đang xử lý" : 
+                                                  item.TrangThai == "ChoXuLy" ? "Chờ xử lý" : "Từ chối")
+                                            </span>
+                                        </td>
+                                        <td>@item.NgayYeuCau.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Biểu đồ yêu cầu theo tháng
+        var monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        var monthlyChart = new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.YeuCauTheoThang.Keys.Select(k => "'" + k + "'")))],
+                datasets: [{
+                    label: 'Số yêu cầu',
+                    data: [@Html.Raw(string.Join(",", Model.YeuCauTheoThang.Values))],
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                    borderWidth: 2,
+                    fill: true
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Biểu đồ trạng thái
+        var statusCtx = document.getElementById('statusChart').getContext('2d');
+        var statusChart = new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.YeuCauTheoTrangThai.Keys.Select(k => "'" + k + "'")))],
+                datasets: [{
+                    data: [@Html.Raw(string.Join(",", Model.YeuCauTheoTrangThai.Values))],
+                    backgroundColor: ['#1cc88a', '#f6c23e', '#36b9cc', '#e74a3b'],
+                    hoverBackgroundColor: ['#17a673', '#f4b619', '#2c9faf', '#c9302c'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Biểu đồ theo dịch vụ
+        var serviceCtx = document.getElementById('serviceChart').getContext('2d');
+        var serviceChart = new Chart(serviceCtx, {
+            type: 'bar',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.YeuCauTheoDichVu.Keys.Select(k => "'" + k + "'")))],
+                datasets: [{
+                    label: 'Số yêu cầu',
+                    data: [@Html.Raw(string.Join(",", Model.YeuCauTheoDichVu.Values))],
+                    backgroundColor: '#4e73df',
+                    borderColor: '#4e73df',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+}

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace QuanLyKhuDanCu.Controllers
 {
-    [Authorize(Policy = "RequireStaffRole")]
+    [Authorize]
     public class HoaDonController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,9 +23,8 @@ namespace QuanLyKhuDanCu.Controllers
         {
             _context = context;
             _userManager = userManager;
-        }
-
-        // GET: HoaDon
+        }        // GET: HoaDon
+        [Authorize(Policy = "RequireStaffRole")]
         public async Task<IActionResult> Index(string searchString, string status, int page = 1)
         {
             var query = _context.HoaDons
@@ -69,10 +68,9 @@ namespace QuanLyKhuDanCu.Controllers
             if (id == null)
             {
                 return NotFound();
-            }
-
-            var hoaDon = await _context.HoaDons
+            }            var hoaDon = await _context.HoaDons
                 .Include(h => h.HoKhau)
+                    .ThenInclude(hk => hk.ChuHo)
                 .Include(h => h.LoaiPhi)
                 .Include(h => h.NguoiThu)
                 .FirstOrDefaultAsync(m => m.HoaDonId == id);
@@ -90,32 +88,36 @@ namespace QuanLyKhuDanCu.Controllers
                 
                 if (nhanKhau == null)
                 {
-                    return Forbid();
+                    return RedirectToAction("AccessDenied", "Account");
                 }
                 
-                var hoKhau = await _context.HoKhaus.FirstOrDefaultAsync(h => h.HoKhauId == nhanKhau.HoKhauId);
-                if (hoKhau == null || hoKhau.HoKhauId != hoaDon.HoKhauId)
+                // Kiểm tra trực tiếp HoKhauId
+                if (nhanKhau.HoKhauId == null || nhanKhau.HoKhauId != hoaDon.HoKhauId)
                 {
-                    return Forbid();
+                    return RedirectToAction("AccessDenied", "Account");
                 }
             }
 
             return View(hoaDon);
-        }
-
-        // GET: HoaDon/Create
+        }        // GET: HoaDon/Create
+        [Authorize(Policy = "RequireStaffRole")]
         public IActionResult Create()
         {
             ViewData["HoKhauId"] = new SelectList(_context.HoKhaus, "HoKhauId", "MaHoKhau");
             ViewData["LoaiPhiId"] = new SelectList(_context.LoaiPhis, "LoaiPhiId", "TenLoaiPhi");
             return View();
-        }
-
-        // POST: HoaDon/Create
+        }        // POST: HoaDon/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "RequireStaffRole")]
         public async Task<IActionResult> Create(HoaDonViewModel model)
         {
+            // Debug logging
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                Console.WriteLine($"ModelState Error: {error.ErrorMessage}");
+            }
+            
             if (ModelState.IsValid)
             {
                 var loaiPhi = await _context.LoaiPhis.FindAsync(model.LoaiPhiId);
@@ -146,9 +148,8 @@ namespace QuanLyKhuDanCu.Controllers
             ViewData["HoKhauId"] = new SelectList(_context.HoKhaus, "HoKhauId", "MaHoKhau");
             ViewData["LoaiPhiId"] = new SelectList(_context.LoaiPhis, "LoaiPhiId", "TenLoaiPhi");
             return View(model);
-        }
-
-        // GET: HoaDon/Edit/5
+        }        // GET: HoaDon/Edit/5
+        [Authorize(Policy = "RequireStaffRole")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -182,11 +183,10 @@ namespace QuanLyKhuDanCu.Controllers
             ViewData["HoKhauId"] = new SelectList(_context.HoKhaus, "HoKhauId", "MaHoKhau");
             ViewData["LoaiPhiId"] = new SelectList(_context.LoaiPhis, "LoaiPhiId", "TenLoaiPhi");
             return View(viewModel);
-        }
-
-        // POST: HoaDon/Edit/5
+        }        // POST: HoaDon/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "RequireStaffRole")]
         public async Task<IActionResult> Edit(int id, HoaDonViewModel model)
         {
             if (id != model.HoaDonId)
@@ -241,9 +241,8 @@ namespace QuanLyKhuDanCu.Controllers
             ViewData["HoKhauId"] = new SelectList(_context.HoKhaus, "HoKhauId", "MaHoKhau");
             ViewData["LoaiPhiId"] = new SelectList(_context.LoaiPhis, "LoaiPhiId", "TenLoaiPhi");
             return View(model);
-        }
-
-        // GET: HoaDon/MarkAsPaid/5
+        }        // GET: HoaDon/MarkAsPaid/5
+        [Authorize(Policy = "RequireStaffRole")]
         public async Task<IActionResult> MarkAsPaid(int? id)
         {
             if (id == null)
@@ -267,11 +266,10 @@ namespace QuanLyKhuDanCu.Controllers
             }
 
             return View(hoaDon);
-        }
-
-        // POST: HoaDon/MarkAsPaid/5
+        }        // POST: HoaDon/MarkAsPaid/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "RequireStaffRole")]
         public async Task<IActionResult> MarkAsPaid(int id)
         {
             var hoaDon = await _context.HoaDons.FindAsync(id);
@@ -294,9 +292,8 @@ namespace QuanLyKhuDanCu.Controllers
             _context.Update(hoaDon);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        // GET: HoaDon/Delete/5
+        }        // GET: HoaDon/Delete/5
+        [Authorize(Policy = "RequireStaffRole")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -321,11 +318,10 @@ namespace QuanLyKhuDanCu.Controllers
             }
 
             return View(hoaDon);
-        }
-
-        // POST: HoaDon/Delete/5
+        }        // POST: HoaDon/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "RequireStaffRole")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var hoaDon = await _context.HoaDons.FindAsync(id);
@@ -353,9 +349,16 @@ namespace QuanLyKhuDanCu.Controllers
                 return RedirectToAction("AccessDenied", "Account");
             }
             
+            // Đảm bảo rằng nhanKhau có HoKhauId
+            if (nhanKhau.HoKhauId == null)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+            
             var query = _context.HoaDons
+                .Include(h => h.HoKhau)  // Thêm Include cho HoKhau
                 .Include(h => h.LoaiPhi)
-                .Where(h => h.HoKhau.HoKhauId == nhanKhau.HoKhauId);
+                .Where(h => h.HoKhauId == nhanKhau.HoKhauId);  // Sử dụng HoKhauId trực tiếp
                 
             if (!string.IsNullOrEmpty(status))
             {

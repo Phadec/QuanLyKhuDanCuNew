@@ -30,100 +30,146 @@
     }
 </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Quản lý Hộ khẩu</h5>
-            </div>
-            <div class="card-body">
-                <p class="card-text">Theo dõi thông tin về hộ khẩu, nhân khẩu và biến động dân cư trong khu vực.</p>
-                @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
-                {
-                    <a asp-controller="HoKhau" asp-action="Index" class="btn btn-primary">Xem hộ khẩu</a>
-                }
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Tạm trú - Tạm vắng</h5>
-            </div>
-            <div class="card-body">
-                <p class="card-text">Đăng ký tạm trú, tạm vắng và quản lý thông tin cư trú.</p>
-                <a asp-controller="TamTruTamVang" asp-action="Create" class="btn btn-primary">Đăng ký</a>
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <a asp-controller="TamTruTamVang" asp-action="MyRequests" class="btn btn-outline-primary">Đơn của tôi</a>
-                }
+@if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+{
+    <!-- Cards dành cho Admin/Manager/Staff - chỉ hiển thị các chức năng quản lý -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quản lý Hộ khẩu</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Theo dõi thông tin về hộ khẩu, nhân khẩu và biến động dân cư trong khu vực.</p>
+                    <a asp-controller="HoKhau" asp-action="Index" class="btn btn-primary">Quản lý hộ khẩu</a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Thanh toán Phí</h5>
-            </div>
-            <div class="card-body">
-                <p class="card-text">Xem và thanh toán các khoản phí, dịch vụ trong khu dân cư.</p>
-                @if (User.IsInRole("Resident"))
-                {
-                    <a asp-controller="HoaDon" asp-action="MyInvoices" class="btn btn-primary">Hóa đơn của tôi</a>
-                }
-                else if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
-                {
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quản lý Hóa đơn</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Quản lý các khoản phí, dịch vụ trong khu dân cư.</p>
                     <a asp-controller="HoaDon" asp-action="Index" class="btn btn-primary">Quản lý hóa đơn</a>
-                }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quản lý Yêu cầu Dịch vụ</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Xử lý các yêu cầu dịch vụ từ cư dân.</p>
+                    <a asp-controller="YeuCauDichVu" asp-action="Index" class="btn btn-primary">Quản lý yêu cầu</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Dịch vụ Cư dân</h5>
-            </div>
-            <div class="card-body">
-                <p class="card-text">Đăng ký các dịch vụ và theo dõi trạng thái xử lý.</p>
-                <a asp-controller="YeuCauDichVu" asp-action="Create" class="btn btn-primary">Yêu cầu dịch vụ</a>
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <a asp-controller="YeuCauDichVu" asp-action="MyRequests" class="btn btn-outline-primary">Yêu cầu của tôi</a>
-                }
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quản lý Tạm trú - Tạm vắng</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Quản lý và xử lý đơn tạm trú, tạm vắng.</p>
+                    <a asp-controller="TamTruTamVang" asp-action="Index" class="btn btn-primary">Quản lý đơn</a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Phản ánh & Góp ý</h5>
-            </div>
-            <div class="card-body">
-                <p class="card-text">Gửi phản ánh, góp ý về các vấn đề trong khu dân cư.</p>
-                <a asp-controller="PhanAnh" asp-action="Create" class="btn btn-primary">Gửi phản ánh</a>
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <a asp-controller="PhanAnh" asp-action="MyFeedback" class="btn btn-outline-primary">Phản ánh của tôi</a>
-                }
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quản lý Phản ánh</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Xử lý phản ánh, góp ý từ cư dân.</p>
+                    <a asp-controller="PhanAnh" asp-action="Index" class="btn btn-primary">Quản lý phản ánh</a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Thông báo</h5>
-            </div>
-            <div class="card-body">
-                <p class="card-text">Các thông báo, tin tức quan trọng từ ban quản lý khu dân cư.</p>
-                <a asp-controller="ThongBao" asp-action="Index" class="btn btn-primary">Xem thông báo</a>
-                @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
-                {
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quản lý Thông báo</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Tạo và quản lý thông báo cho cư dân.</p>
+                    <a asp-controller="ThongBao" asp-action="Index" class="btn btn-primary">Quản lý thông báo</a>
                     <a asp-controller="ThongBao" asp-action="Create" class="btn btn-outline-primary">Tạo thông báo</a>
-                }
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
+else if (User.IsInRole("Resident"))
+{
+    <!-- Cards dành cho Resident - chỉ hiển thị các chức năng yêu cầu và xem -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Tạm trú - Tạm vắng</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Đăng ký tạm trú, tạm vắng và theo dõi trạng thái.</p>
+                    <a asp-controller="TamTruTamVang" asp-action="Create" class="btn btn-primary">Đăng ký</a>
+                    <a asp-controller="TamTruTamVang" asp-action="MyRequests" class="btn btn-outline-primary">Đơn của tôi</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Hóa đơn của tôi</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Xem và thanh toán các khoản phí, dịch vụ.</p>
+                    <a asp-controller="HoaDon" asp-action="MyInvoices" class="btn btn-primary">Hóa đơn của tôi</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Dịch vụ Cư dân</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Đăng ký các dịch vụ và theo dõi trạng thái xử lý.</p>
+                    <a asp-controller="YeuCauDichVu" asp-action="Create" class="btn btn-primary">Yêu cầu dịch vụ</a>
+                    <a asp-controller="YeuCauDichVu" asp-action="MyRequests" class="btn btn-outline-primary">Yêu cầu của tôi</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Phản ánh & Góp ý</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Gửi phản ánh, góp ý về các vấn đề trong khu dân cư.</p>
+                    <a asp-controller="PhanAnh" asp-action="Create" class="btn btn-primary">Gửi phản ánh</a>
+                    <a asp-controller="PhanAnh" asp-action="MyFeedback" class="btn btn-outline-primary">Phản ánh của tôi</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Thông báo</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Các thông báo, tin tức quan trọng từ ban quản lý khu dân cư.</p>
+                    <a asp-controller="ThongBao" asp-action="Index" class="btn btn-primary">Xem thông báo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}

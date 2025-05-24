@@ -165,5 +165,11 @@ namespace QuanLyKhuDanCu.Controllers
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 }

@@ -215,15 +215,16 @@ namespace QuanLyKhuDanCu.Controllers
                 .Where(y => y.NgayYeuCau >= startDate && y.NgayYeuCau <= endDate)
                 .GroupBy(y => y.DichVu.TenDichVu)
                 .Select(g => new KeyValuePair<string, int>(g.Key, g.Count()))
-                .ToDictionaryAsync(kvp => kvp.Key, kvp => kvp.Value);
-
-            // Get average processing time (in days)
-            var avgProcessingTime = await _context.YeuCauDichVus
+                .ToDictionaryAsync(kvp => kvp.Key, kvp => kvp.Value);            // Get average processing time (in days)
+            var completedRequests = await _context.YeuCauDichVus
                 .Where(y => y.TrangThai == "DaHoanThanh" && y.NgayHoanThanh.HasValue &&
                        y.NgayYeuCau >= startDate && y.NgayYeuCau <= endDate)
-                .Select(y => (y.NgayHoanThanh.Value - y.NgayYeuCau).Days)
-                .DefaultIfEmpty(0)
-                .AverageAsync();
+                .Select(y => new { NgayYeuCau = y.NgayYeuCau, NgayHoanThanh = y.NgayHoanThanh.Value })
+                .ToListAsync();
+            
+            var avgProcessingTime = completedRequests.Any() 
+                ? completedRequests.Average(r => (r.NgayHoanThanh - r.NgayYeuCau).Days)
+                : 0;
 
             // Get recent service requests
             var recentRequests = await _context.YeuCauDichVus
