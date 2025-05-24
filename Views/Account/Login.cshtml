@@ -2,21 +2,23 @@
 
 @{
     ViewData["Title"] = "Đăng nhập";
-    Layout = "_LayoutLogin";
+    Layout = "_LayoutAuth";
 }
 
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-5">
-            <div class="login-logo">
+            <div class="auth-logo">
                 <img src="~/images/logo.png" alt="Logo Khu Dân Cư" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2080%2080%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22grad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20style%3D%22stop-color%3A%231a4a73%3Bstop-opacity%3A1%22%20%2F%3E%3Cstop%20offset%3D%22100%25%22%20style%3D%22stop-color%3A%233498db%3Bstop-opacity%3A1%22%20%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20fill%3D%22url%28%23grad%29%22%20d%3D%22M40%2038.5l-18%2011.2V34.2L40%2023l18%2011.2v15.5z%22%2F%3E%3Cpath%20fill%3D%22%232980b9%22%20d%3D%22M40%2057l-18-11.2L40%2034.6l18%2011.2z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E';" />
                 <h2 class="brand-text">Quản Lý Khu Dân Cư</h2>
             </div>
-            <div class="card shadow-lg border-0 rounded-lg">
-                <div class="card-header">
-                    <h3 class="text-center font-weight-light">Đăng nhập hệ thống</h3>
+            <div class="auth-card shadow-lg border-0 rounded-lg">
+                <div class="auth-card-header">
+                    <h3 class="text-center font-weight-light my-2">
+                        <i class="fas fa-user-circle text-primary me-2"></i>Đăng nhập hệ thống
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div class="auth-card-body">
                     @if (TempData["ErrorMessage"] != null)
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -34,55 +36,79 @@
                         </div>
                     }
 
-                    <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
-                        <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert">
+                    <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="auth-validation-summary" role="alert">
                             <ul></ul>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input asp-for="Email" class="form-control" id="inputEmail" placeholder="name@example.com" autocomplete="username" />
+                        
+                        <div class="form-floating mb-4 auth-form-floating">
+                            <input asp-for="Email" class="form-control" id="inputEmail" placeholder="name@example.com" autocomplete="username" required />
                             <label asp-for="Email" for="inputEmail"><i class="fas fa-envelope me-2"></i>Email</label>
-                            <span asp-validation-for="Email" class="field-validation-error"></span>
+                            <span asp-validation-for="Email" class="auth-validation-error"></span>
                         </div>
-                        <div class="form-floating mb-3 password-container">
-                            <input asp-for="Password" class="form-control" id="inputPassword" placeholder="Password" autocomplete="current-password" />
+                        
+                        <div class="form-floating mb-4 auth-password-container">
+                            <input asp-for="Password" class="form-control" id="inputPassword" placeholder="Password" autocomplete="current-password" required />
                             <label asp-for="Password" for="inputPassword"><i class="fas fa-lock me-2"></i>Mật khẩu</label>
-                            <button type="button" class="btn toggle-password" tabindex="-1" aria-label="Hiển thị mật khẩu">
+                            <button type="button" class="btn auth-toggle-password" tabindex="-1" aria-label="Hiển thị mật khẩu">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <span asp-validation-for="Password" class="field-validation-error"></span>
+                            <span asp-validation-for="Password" class="auth-validation-error"></span>
                         </div>
-                        <div class="form-check mb-3">
+                        
+                        <div class="form-check mb-4">
                             <input asp-for="RememberMe" class="form-check-input" id="inputRememberPassword" />
-                            <label asp-for="RememberMe" class="form-check-label" for="inputRememberPassword">Ghi nhớ đăng nhập</label>
+                            <label asp-for="RememberMe" class="form-check-label" for="inputRememberPassword">
+                                <i class="fas fa-check-circle me-1 text-primary"></i>Ghi nhớ đăng nhập
+                            </label>
                         </div>
+                        
                         <div class="d-grid gap-2 mt-4 mb-0">
-                            <button type="submit" class="btn btn-primary py-3">
+                            <button type="submit" class="btn auth-btn-primary py-3">
                                 <i class="fas fa-sign-in-alt me-2"></i> Đăng nhập
                             </button>
                         </div>
                     </form>
                 </div>
-                <div class="card-footer text-center py-3">
+                <div class="auth-card-footer text-center py-3">
                     <div class="links">
-                        <div class="mb-2">
-                            <a href="/Account/ForgotPassword" class="btn-link">
+                        <div class="mb-3">
+                            <a href="/Account/ForgotPassword" class="auth-btn-link">
                                 <i class="fas fa-key me-1"></i> Quên mật khẩu?
                             </a>
                         </div>
                         <div>
-                            <a href="/Account/Register" class="btn-link">
+                            <a href="/Account/Register" class="btn btn-outline-primary">
                                 <i class="fas fa-user-plus me-1"></i> Đăng ký tài khoản mới
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="text-center mt-3 text-white">
-                <small>Bản quyền &copy; Quản lý khu dân cư @DateTime.Now.Year</small>
-            </div>
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+    </style>
+}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -92,7 +118,7 @@
             document.getElementById('inputEmail').focus();
             
             // Toggle password visibility
-            const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+            const togglePasswordButtons = document.querySelectorAll('.auth-toggle-password');
             togglePasswordButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const input = this.parentElement.querySelector('input');
@@ -118,6 +144,18 @@
                     }
                 });
             }, 5000);
+            
+            // Form validation
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
         });
     </script>
 }
