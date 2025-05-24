@@ -1,70 +1,87 @@
 @model QuanLyKhuDanCu.Models.HoKhau
 
 @{
-    ViewData["Title"] = "Xóa hộ khẩu";
+    ViewData["Title"] = "Xóa Hộ khẩu";
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="container-fluid">
+    <h1 class="mt-4">Xóa Hộ khẩu</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Hộ khẩu</a></li>
+        <li class="breadcrumb-item active">Xóa</li>
+    </ol>
 
-<div class="alert alert-danger">
-    <i class="fas fa-exclamation-triangle me-2"></i>
-    <strong>Cảnh báo:</strong> Bạn có chắc chắn muốn xóa hộ khẩu này? Hành động này không thể hoàn tác.
-</div>
-
-<div class="card mb-4">
-    <div class="card-header">
-        <i class="fas fa-home me-1"></i>
-        Thông tin hộ khẩu sẽ bị xóa
+    <div class="alert alert-danger">
+        <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Xác nhận xóa!</h4>
+        <p>Bạn có chắc chắn muốn xóa hộ khẩu này không? Hành động này không thể hoàn tác.</p>
+        <p>Việc xóa hộ khẩu cũng sẽ xóa tất cả các nhân khẩu và hóa đơn liên quan đến hộ khẩu này.</p>
     </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <dl class="row">
-                    <dt class="col-sm-4">Mã hộ khẩu:</dt>
-                    <dd class="col-sm-8">@Model.MaHoKhau</dd>
-                    
-                    <dt class="col-sm-4">Địa chỉ:</dt>
-                    <dd class="col-sm-8">@Model.DiaChi</dd>
-                    
-                    <dt class="col-sm-4">Chủ hộ:</dt>
-                    <dd class="col-sm-8">@Model.ChuHo.HoTen</dd>
-                    
-                    <dt class="col-sm-4">Ngày tạo:</dt>
-                    <dd class="col-sm-8">@Model.NgayTao.ToString("dd/MM/yyyy")</dd>
-                    
-                    <dt class="col-sm-4">Trạng thái:</dt>
-                    <dd class="col-sm-8">
-                        @if (Model.TrangThai)
-                        {
-                            <span class="badge bg-success">Hoạt động</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger">Đã khóa</span>
-                        }
-                    </dd>
-                </dl>
-            </div>
-            <div class="col-md-6">
-                <dl class="row">
-                    <dt class="col-sm-4">Số nhân khẩu:</dt>
-                    <dd class="col-sm-8">@Model.NhanKhaus.Count</dd>
-                    
-                    <dt class="col-sm-4">Ghi chú:</dt>
-                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.GhiChu) ? "Không có" : Model.GhiChu)</dd>
-                </dl>
-            </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-trash-alt me-1"></i> Thông tin Hộ khẩu sẽ bị xóa
         </div>
-    </div>
-    <div class="card-footer">
-        <form asp-action="Delete" method="post">
-            <input type="hidden" asp-for="HoKhauId" />
-            <button type="submit" class="btn btn-danger">
-                <i class="fas fa-trash"></i> Xác nhận xóa
-            </button>
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Quay lại danh sách
-            </a>
-        </form>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.MaHoKhau)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.MaHoKhau)
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.ChuHo)
+                </dt>
+                <dd class="col-sm-9">
+                    @(Model.ChuHo?.HoTen ?? "Không có thông tin chủ hộ")
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.DiaChi)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.DiaChi)
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.NgayTao)
+                </dt>
+                <dd class="col-sm-9">
+                    @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.TrangThai)
+                </dt>
+                <dd class="col-sm-9">
+                    @if (Model.TrangThai)
+                    {
+                        <span class="badge bg-success">Hoạt động</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Không hoạt động</span>
+                    }
+                </dd>
+                 @if (!string.IsNullOrEmpty(Model.GhiChu))
+                {
+                    <dt class="col-sm-3">
+                        @Html.DisplayNameFor(model => model.GhiChu)
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.GhiChu)
+                    </dd>
+                }
+            </dl>
+        </div>
+        <div class="card-footer">
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="HoKhauId" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Xóa vĩnh viễn
+                </button>
+                <a asp-action="Details" asp-route-id="@Model.HoKhauId" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Hủy
+                </a>
+            </form>
+        </div>
     </div>
 </div>

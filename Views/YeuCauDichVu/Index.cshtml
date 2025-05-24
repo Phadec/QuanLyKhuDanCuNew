@@ -29,12 +29,14 @@
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
-                        <select name="status" class="form-select" onchange="this.form.submit()" style="width: auto;">
-                            @foreach (var item in (SelectList)ViewData["Status"])
-                            {
-                                <option value="@item.Value" selected="@item.Selected">@item.Text</option>
-                            }
-                        </select>
+                        <div class="form-group">
+                            <select name="status" class="form-control" onchange="this.form.submit()">
+                                @foreach (var item in (ViewBag.Status as SelectList) ?? new SelectList(new List<SelectListItem>()))
+                                {
+                                    <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                                }
+                            </select>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -102,7 +104,7 @@
                 var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
                 var nextDisabled = !Model.HasNextPage ? "disabled" : "";
                 var currentFilter = Context.Request.Query["searchString"].ToString();
-                var currentStatus = Context.Request.Query["status"].ToString();
+                var status = Context.Request.Query["status"].ToString();
             }
 
             <nav aria-label="Page navigation">
@@ -111,7 +113,7 @@
                         <a asp-action="Index"
                            asp-route-page="@(Model.PageIndex - 1)"
                            asp-route-searchString="@currentFilter"
-                           asp-route-status="@currentStatus"
+                           asp-route-status="@status"
                            class="page-link @prevDisabled">
                             <i class="fas fa-angle-left"></i> Trước
                         </a>
@@ -123,7 +125,7 @@
                             <a asp-action="Index"
                                asp-route-page="@i"
                                asp-route-searchString="@currentFilter"
-                               asp-route-status="@currentStatus"
+                               asp-route-status="@status"
                                class="page-link">
                                 @i
                             </a>
@@ -134,7 +136,7 @@
                         <a asp-action="Index"
                            asp-route-page="@(Model.PageIndex + 1)"
                            asp-route-searchString="@currentFilter"
-                           asp-route-status="@currentStatus"
+                           asp-route-status="@status"
                            class="page-link @nextDisabled">
                             Tiếp <i class="fas fa-angle-right"></i>
                         </a>

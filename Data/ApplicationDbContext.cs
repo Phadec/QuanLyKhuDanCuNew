@@ -36,6 +36,62 @@ namespace QuanLyKhuDanCu.Data
                 .Property(t => t.NguoiDuyetId)
                 .IsRequired(false);
 
+            // Configure YeuCauDichVu entity to have nullable NguoiXuLyId
+            builder.Entity<YeuCauDichVu>(entity => 
+            {
+                entity.Property(y => y.NguoiXuLyId)
+                    .IsRequired(false);
+                    
+                entity.HasOne(y => y.NguoiXuLy)
+                    .WithMany()
+                    .HasForeignKey(y => y.NguoiXuLyId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.YeuCauDichVus) 
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.DichVu)
+                    .WithMany(d => d.YeuCauDichVus) 
+                    .HasForeignKey(e => e.DichVuId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure PhanAnh entity relationships
+            builder.Entity<PhanAnh>(entity =>
+            {
+                entity.Property(p => p.NguoiXuLyId)
+                    .IsRequired(false); 
+
+                entity.Property(p => p.PhanHoi)
+                    .IsRequired(false); 
+
+                entity.HasOne(p => p.NguoiXuLy)
+                    .WithMany() 
+                    .HasForeignKey(p => p.NguoiXuLyId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.User)
+                    .WithMany(u => u.PhanAnhs) 
+                    .HasForeignKey(p => p.UserId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(); 
+            });
+
+            // Configure ThongBao entity
+            builder.Entity<ThongBao>(entity =>
+            {
+                entity.Property(t => t.FileDinhKem)
+                    .IsRequired(false); // Make FileDinhKem optional
+
+                entity.HasOne(t => t.NguoiTao)
+                    .WithMany(u => u.ThongBaos) // Assuming ApplicationUser has a ThongBaos collection
+                    .HasForeignKey(t => t.NguoiTaoId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+            });
+            
             // Configure relationships
             // HoKhau - ChuHo (ApplicationUser)
             builder.Entity<HoKhau>()

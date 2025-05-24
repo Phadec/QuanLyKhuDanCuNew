@@ -1,0 +1,103 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<div id="layoutSidenav_nav">
+    <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+        <div class="sb-sidenav-menu">
+            <div class="nav">
+                <div class="sb-sidenav-menu-heading">Chính</div>
+                <a class="nav-link" asp-controller="Home" asp-action="Index">
+                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    Bảng điều khiển
+                </a>
+                
+                <div class="sb-sidenav-menu-heading">Quản lý chung</div>
+                
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+                {
+                    <div class="sb-sidenav-menu-heading">Quản lý cư dân</div>
+                    <a class="nav-link" asp-controller="HoKhau" asp-action="Index">
+                        <div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
+                        Hộ khẩu
+                    </a>
+                    <a class="nav-link" asp-controller="NhanKhau" asp-action="Index">
+                        <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                        Nhân khẩu
+                    </a>
+
+                    <!-- Quản lý tài chính - Chỉ hiển thị cho admin, manager, staff -->
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseTaiChinh" aria-expanded="false" aria-controls="collapseTaiChinh">
+                        <div class="sb-nav-link-icon"><i class="fas fa-money-bill"></i></div>
+                        Quản lý tài chính
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseTaiChinh" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" asp-controller="LoaiPhi" asp-action="Index">Loại phí</a>
+                            <a class="nav-link" asp-controller="HoaDon" asp-action="Index">Hóa đơn</a>
+                        </nav>
+                    </div>
+                    
+                    <!-- Quản lý dịch vụ - Chỉ hiển thị cho admin, manager, staff -->
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDichVu" aria-expanded="false" aria-controls="collapseDichVu">
+                        <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
+                        Quản lý dịch vụ
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseDichVu" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" asp-controller="DichVu" asp-action="Index">Danh sách dịch vụ</a>
+                            <a class="nav-link" asp-controller="YeuCauDichVu" asp-action="Index">Yêu cầu dịch vụ</a>
+                        </nav>
+                    </div>
+                }
+                
+                <!-- Các tính năng dành cho mọi người dùng -->
+                <a class="nav-link" asp-controller="ThongBao" asp-action="Index">
+                    <div class="sb-nav-link-icon"><i class="fas fa-bell"></i></div>
+                    Thông báo
+                </a>
+                
+                @if (User.IsInRole("Resident"))
+                {
+                    <!-- Tính năng dành riêng cho cư dân -->
+                    <a class="nav-link" asp-controller="YeuCauDichVu" asp-action="MyRequests">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tools"></i></div>
+                        Yêu cầu dịch vụ
+                    </a>
+                    <a class="nav-link" asp-controller="HoaDon" asp-action="MyInvoices">
+                        <div class="sb-nav-link-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                        Hóa đơn của tôi
+                    </a>
+                    <a class="nav-link" asp-controller="PhanAnh" asp-action="MyFeedback">
+                        <div class="sb-nav-link-icon"><i class="fas fa-comment-alt"></i></div>
+                        Phản ánh kiến nghị
+                    </a>
+                }
+                
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <!-- Quản lý người dùng - Chỉ hiển thị cho admin và manager -->
+                    <div class="sb-sidenav-menu-heading">Quản trị</div>
+                    <a class="nav-link" asp-controller="UserManagement" asp-action="Index">
+                        <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                        Quản lý người dùng
+                    </a>
+                    <a class="nav-link" asp-controller="UserManagement" asp-action="ManageRoles">
+                        <div class="sb-nav-link-icon"><i class="fas fa-user-tag"></i></div>
+                        Quản lý vai trò
+                    </a>
+                    <a class="nav-link" asp-controller="PhanAnh" asp-action="Index">
+                        <div class="sb-nav-link-icon"><i class="fas fa-comments"></i></div>
+                        Quản lý phản ánh
+                    </a>
+                }
+            </div>
+        </div>
+        <div class="sb-sidenav-footer">
+            <div class="small">Đăng nhập với:</div>
+            @User.Identity?.Name
+        </div>
+    </nav>
+</div>

@@ -1,9 +1,6 @@
-using Microsoft.AspNetCore.Identity;
-using QuanLyKhuDanCu.Data;
 using QuanLyKhuDanCu.Models;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace QuanLyKhuDanCu.Data.Seeders
 {
@@ -11,98 +8,49 @@ namespace QuanLyKhuDanCu.Data.Seeders
     {
         public static async Task SeedHoKhauAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
-            if (context.HoKhaus.Any())
+            if (await context.HoKhaus.AnyAsync())
             {
-                return; // Database has been seeded
+                return; // Already seeded
             }
 
-            // Get resident users
-            var residents = await userManager.GetUsersInRoleAsync("Resident");
-            if (residents.Count == 0)
-            {
-                return; // No residents to create households for
-            }
+            var resident1 = await userManager.FindByEmailAsync("resident1@example.com");
+            var resident2 = await userManager.FindByEmailAsync("resident2@example.com");
+            var admin = await userManager.FindByEmailAsync("admin@example.com");
 
-            // Create households
-            for (int i = 0; i < Math.Min(residents.Count, 3); i++)
+            if (resident1 == null) resident1 = admin;
+            if (resident2 == null) resident2 = admin;
+
+            if (resident1 != null)
             {
-                var resident = residents[i];
-                
-                var hoKhau = new HoKhau
+                var hoKhaus = new List<HoKhau>
                 {
-                    MaHoKhau = $"HK{DateTime.Now.Year}{i + 1:D3}",
-                    DiaChi = $"Tòa A, Căn {100 + i}, Khu dân cư ABC",
-                    NgayTao = DateTime.Now.AddDays(-30),
-                    ChuHoId = resident.Id,
-                    GhiChu = "Hộ khẩu demo",
-                    TrangThai = true
+                    new HoKhau
+                    {
+                        MaHoKhau = "HK001",
+                        ChuHoId = resident1.Id,
+                        DiaChi = "Căn hộ A101, Tòa nhà CT1",
+                        NgayTao = DateTime.Now.AddDays(-30),
+                        TrangThai = true,
+                        GhiChu = "Hộ gia đình đầy đủ"
+                    }
                 };
 
-                context.HoKhaus.Add(hoKhau);
+                if (resident2 != null)
+                {
+                    hoKhaus.Add(new HoKhau
+                    {
+                        MaHoKhau = "HK002", 
+                        ChuHoId = resident2.Id,
+                        DiaChi = "Căn hộ B205, Tòa nhà CT2",
+                        NgayTao = DateTime.Now.AddDays(-25),
+                        TrangThai = true,
+                        GhiChu = "Hộ gia đình mới"
+                    });
+                }
+
+                await context.HoKhaus.AddRangeAsync(hoKhaus);
                 await context.SaveChangesAsync();
-
-                // Create people for each household
-                var nhanKhau = new NhanKhau
-                {
-                    HoTen = resident.HoTen,
-                    NgaySinh = resident.NgaySinh,
-                    GioiTinh = "Nam",
-                    CMND = resident.CMND,
-                    QuocTich = "Việt Nam",
-                    NgheNghiep = "Nhân viên văn phòng",
-                    NoiLamViec = "Công ty ABC",
-                    QuanHeVoiChuHo = "Chủ hộ",
-                    SoDienThoai = resident.SoDienThoai,
-                    Email = resident.Email,
-                    HoKhauId = hoKhau.HoKhauId,
-                    TrangThai = true,
-                    UserId = resident.Id,
-                    NgayDangKy = DateTime.Now.AddDays(-30)
-                };
-
-                context.NhanKhaus.Add(nhanKhau);
-
-                // Add family members
-                var familyMember1 = new NhanKhau
-                {
-                    HoTen = $"Người thân 1 của {resident.HoTen}",
-                    NgaySinh = DateTime.Now.AddYears(-30),
-                    GioiTinh = "Nữ",
-                    CMND = new Random().Next(100000000, 999999999).ToString(),
-                    QuocTich = "Việt Nam",
-                    NgheNghiep = "Giáo viên",
-                    NoiLamViec = "Trường học XYZ",
-                    QuanHeVoiChuHo = "Vợ",
-                    SoDienThoai = "0" + new Random().Next(100000000, 999999999).ToString(),
-                    Email = $"family1_{i}@example.com",
-                    HoKhauId = hoKhau.HoKhauId,
-                    TrangThai = true,
-                    NgayDangKy = DateTime.Now.AddDays(-30)
-                };
-
-                context.NhanKhaus.Add(familyMember1);
-
-                var familyMember2 = new NhanKhau
-                {
-                    HoTen = $"Người thân 2 của {resident.HoTen}",
-                    NgaySinh = DateTime.Now.AddYears(-10),
-                    GioiTinh = "Nam",
-                    CMND = "",
-                    QuocTich = "Việt Nam",
-                    NgheNghiep = "Học sinh",
-                    NoiLamViec = "Trường học ABC",
-                    QuanHeVoiChuHo = "Con",
-                    SoDienThoai = "",
-                    Email = "",
-                    HoKhauId = hoKhau.HoKhauId,
-                    TrangThai = true,
-                    NgayDangKy = DateTime.Now.AddDays(-30)
-                };
-
-                context.NhanKhaus.Add(familyMember2);
             }
-
-            await context.SaveChangesAsync();
         }
     }
 }

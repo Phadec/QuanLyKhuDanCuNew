@@ -1,0 +1,165 @@
+@model QuanLyKhuDanCu.Models.YeuCauDichVu
+@{
+    // Fix title reference - YeuCauDichVu doesn't have a TieuDe property
+    ViewData["Title"] = "Chi tiết yêu cầu dịch vụ";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+        {
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý yêu cầu</a></li>
+        }
+        else
+        {
+            <li class="breadcrumb-item"><a asp-action="MyRequests">Yêu cầu của tôi</a></li>
+        }
+        <li class="breadcrumb-item active">Chi tiết</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Thông tin yêu cầu dịch vụ
+                </div>
+                <div class="card-body">
+                    <h4 class="mb-3">Dịch vụ: @Model.DichVu?.TenDichVu</h4>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Người yêu cầu:</strong> @Model.User?.HoTen</p>
+                            <p><strong>Ngày yêu cầu:</strong> @Model.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Trạng thái:</strong>
+                                @if (Model.TrangThai == "ChoXuLy")
+                                {
+                                    <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                                }
+                                else if (Model.TrangThai == "DangXuLy")
+                                {
+                                    <span class="badge bg-primary">Đang xử lý</span>
+                                }
+                                else if (Model.TrangThai == "DaHoanThanh")
+                                {
+                                    <span class="badge bg-success">Đã hoàn thành</span>
+                                }
+                                else if (Model.TrangThai == "TuChoi")
+                                {
+                                    <span class="badge bg-danger">Từ chối</span>
+                                }
+                            </p>
+                            @if (Model.NguoiXuLy != null)
+                            {
+                                <p><strong>Người xử lý:</strong> @Model.NguoiXuLy.HoTen</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">Nội dung yêu cầu</div>
+                        <div class="card-body">
+                            <p>@Html.Raw(Model.NoiDung.Replace("\n", "<br />"))</p>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.GhiChu))
+                    {
+                        <div class="card mb-3">
+                            <div class="card-header">Ghi chú</div>
+                            <div class="card-body">
+                                <p>@Html.Raw(Model.GhiChu.Replace("\n", "<br />"))</p>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.NgayXuLy.HasValue)
+                    {
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">Thông tin xử lý</div>
+                            <div class="card-body">
+                                <p><strong>Ngày bắt đầu xử lý:</strong> @Model.NgayXuLy.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                @if (Model.NgayHoanThanh.HasValue)
+                                {
+                                    <p><strong>Ngày hoàn thành:</strong> @Model.NgayHoanThanh.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Remove reference to non-existent FileDinhKem property -->
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-tasks me-1"></i>
+                    Thao tác
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+                        {
+                            <a asp-action="Index" class="btn btn-outline-secondary mb-2">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+                            </a>
+                            
+                            @if (Model.TrangThai == "ChoXuLy" || Model.TrangThai == "DangXuLy")
+                            {
+                                <a asp-action="ProcessRequest" asp-route-id="@Model.YeuCauDichVuId" class="btn btn-primary mb-2">
+                                    <i class="fas fa-cogs me-1"></i> Xử lý yêu cầu
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            <a asp-action="MyRequests" class="btn btn-outline-secondary mb-2">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+                            </a>
+                        }
+                        
+                        @if ((User.IsInRole("Admin") || User.Identity?.Name == Model.User?.UserName) && Model.TrangThai == "ChoXuLy")
+                        {
+                            <a asp-action="Cancel" asp-route-id="@Model.YeuCauDichVuId" class="btn btn-danger mb-2">
+                                <i class="fas fa-ban me-1"></i> Hủy yêu cầu
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            @if (Model.TrangThai == "DaHoanThanh" && User.IsInRole("Resident"))
+            {
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <i class="fas fa-star me-1"></i> Đánh giá dịch vụ
+                    </div>
+                    <div class="card-body">
+                        <p>Yêu cầu dịch vụ của bạn đã hoàn thành.</p>
+                        <a href="#" class="btn btn-outline-success w-100">
+                            <i class="fas fa-comment-alt me-1"></i> Đánh giá dịch vụ
+                        </a>
+                    </div>
+                </div>
+            }
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i> Thông tin dịch vụ
+                </div>
+                <div class="card-body">
+                    <h5>@Model.DichVu?.TenDichVu</h5>
+                    <p>@Model.DichVu?.MoTa</p>
+                    <p><strong>Phí dịch vụ:</strong> @String.Format("{0:N0}", Model.DichVu?.PhiDichVu) VNĐ</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

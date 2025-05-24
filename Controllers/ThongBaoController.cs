@@ -134,13 +134,34 @@ namespace QuanLyKhuDanCu.Controllers
         // POST: ThongBao/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "RequireStaffRole")]
+        [Authorize(Roles = "Admin,Manager,Staff")]
         public async Task<IActionResult> Create(ThongBaoViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var user = await _userManager.GetUserAsync(User);
-                
+                if (user == null)
+                {
+                    return Challenge(); // Or handle unauthorized access appropriately
+                }
+
+                string? uniqueFileName = null;
+                if (model.FileDinhKemUpload != null)
+                {
+                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "thongbao");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+                    uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.FileDinhKemUpload.FileName);
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.FileDinhKemUpload.CopyToAsync(fileStream);
+                    }
+                    uniqueFileName = Path.Combine("uploads", "thongbao", uniqueFileName).Replace("\\", "/"); // Store relative path
+                }
+
                 var thongBao = new ThongBao
                 {
                     TieuDe = model.TieuDe,
@@ -148,32 +169,14 @@ namespace QuanLyKhuDanCu.Controllers
                     NgayTao = DateTime.Now,
                     NgayHetHan = model.NgayHetHan,
                     DoiTuong = model.DoiTuong,
-                    TrangThai = true,
-                    NguoiTaoId = user.Id
+                    TrangThai = model.TrangThai,
+                    NguoiTaoId = user.Id,
+                    FileDinhKem = uniqueFileName // This will be null if no file was uploaded
                 };
-
-                // Handle file upload
-                if (model.FileDinhKem != null && model.FileDinhKem.Length > 0)
-                {
-                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "thongbao");
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
-
-                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.FileDinhKem.FileName;
-                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await model.FileDinhKem.CopyToAsync(fileStream);
-                    }
-
-                    thongBao.FileDinhKem = uniqueFileName;
-                }
 
                 _context.Add(thongBao);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Tạo thông báo thành công!";
                 return RedirectToAction(nameof(Index));
             }
             return View(model);
@@ -220,8 +223,8 @@ namespace QuanLyKhuDanCu.Controllers
         // POST: ThongBao/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "RequireStaffRole")]
-        public async Task<IActionResult> Edit(int id, ThongBaoViewModel model)
+        [Authorize(Roles = "Admin,Manager,Staff")]
+        public async Task<IActionResult> Edit(int id, ThongBaoViewModel model, bool removeExistingFile)
         {
             if (id != model.ThongBaoId)
             {
@@ -232,64 +235,73 @@ namespace QuanLyKhuDanCu.Controllers
             {
                 try
                 {
-                    var thongBao = await _context.ThongBaos.FindAsync(id);
-                    if (thongBao == null)
+                    var thongBaoToUpdate = await _context.ThongBaos.FindAsync(id);
+                    if (thongBaoToUpdate == null)
                     {
                         return NotFound();
                     }
 
-                    // Check if user has rights to edit this announcement
                     var user = await _userManager.GetUserAsync(User);
-                    var isAdmin = User.IsInRole("Admin");
-                    
-                    if (!isAdmin && thongBao.NguoiTaoId != user.Id)
+                    if (user == null)
                     {
-                        return Forbid();
+                        return Challenge();
                     }
 
-                    thongBao.TieuDe = model.TieuDe;
-                    thongBao.NoiDung = model.NoiDung;
-                    thongBao.NgayHetHan = model.NgayHetHan;
-                    thongBao.DoiTuong = model.DoiTuong;
-                    thongBao.TrangThai = model.TrangThai;
+                    // Update properties
+                    thongBaoToUpdate.TieuDe = model.TieuDe;
+                    thongBaoToUpdate.NoiDung = model.NoiDung;
+                    thongBaoToUpdate.NgayHetHan = model.NgayHetHan;
+                    thongBaoToUpdate.DoiTuong = model.DoiTuong;
+                    thongBaoToUpdate.TrangThai = model.TrangThai;
+                    // NguoiTaoId should not change on edit, it's already set
 
-                    // Handle file upload if a new file is provided
-                    if (model.FileDinhKem != null && model.FileDinhKem.Length > 0)
+                    string? uniqueFileName = thongBaoToUpdate.FileDinhKem; // Keep existing file by default
+
+                    if (removeExistingFile && !string.IsNullOrEmpty(thongBaoToUpdate.FileDinhKem))
                     {
-                        // Delete the old file if it exists
-                        if (!string.IsNullOrEmpty(thongBao.FileDinhKem))
+                        string oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, thongBaoToUpdate.FileDinhKem.TrimStart('/'));
+                        if (System.IO.File.Exists(oldFilePath))
                         {
-                            string oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "thongbao", thongBao.FileDinhKem);
+                            System.IO.File.Delete(oldFilePath);
+                        }
+                        uniqueFileName = null; // Mark as no file
+                    }
+
+                    if (model.FileDinhKemUpload != null)
+                    {
+                        // Delete old file if a new one is uploaded and an old one exists
+                        if (!string.IsNullOrEmpty(thongBaoToUpdate.FileDinhKem) && !removeExistingFile) // if not already removed
+                        {
+                            string oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, thongBaoToUpdate.FileDinhKem.TrimStart('/'));
                             if (System.IO.File.Exists(oldFilePath))
                             {
                                 System.IO.File.Delete(oldFilePath);
                             }
                         }
-
-                        // Save the new file
+                        
                         string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "thongbao");
                         if (!Directory.Exists(uploadsFolder))
                         {
                             Directory.CreateDirectory(uploadsFolder);
                         }
-
-                        string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.FileDinhKem.FileName;
+                        uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.FileDinhKemUpload.FileName);
                         string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
                         using (var fileStream = new FileStream(filePath, FileMode.Create))
                         {
-                            await model.FileDinhKem.CopyToAsync(fileStream);
+                            await model.FileDinhKemUpload.CopyToAsync(fileStream);
                         }
-
-                        thongBao.FileDinhKem = uniqueFileName;
+                        uniqueFileName = Path.Combine("uploads", "thongbao", uniqueFileName).Replace("\\", "/");
                     }
+                    
+                    thongBaoToUpdate.FileDinhKem = uniqueFileName;
 
-                    _context.Update(thongBao);
+                    _context.Update(thongBaoToUpdate);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Cập nhật thông báo thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ThongBaoExists(id))
+                    if (!ThongBaoExists(model.ThongBaoId))
                     {
                         return NotFound();
                     }
@@ -300,6 +312,7 @@ namespace QuanLyKhuDanCu.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            // If ModelState is invalid, return the view with the model
             return View(model);
         }
 

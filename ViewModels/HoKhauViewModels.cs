@@ -3,27 +3,53 @@ using System.ComponentModel.DataAnnotations;
 
 namespace QuanLyKhuDanCu.ViewModels
 {
-    public class HoKhauViewModel
+    public class CreateHoKhauViewModel
     {
-        public int HoKhauId { get; set; }
-
-        [Required(ErrorMessage = "Mã hộ khẩu không được để trống")]
+        [Required(ErrorMessage = "Mã hộ khẩu là bắt buộc")]
         [Display(Name = "Mã hộ khẩu")]
         public string MaHoKhau { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Địa chỉ không được để trống")]
-        [Display(Name = "Địa chỉ")]
-        public string DiaChi { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Chủ hộ không được để trống")]
+        [Required(ErrorMessage = "Chủ hộ là bắt buộc")]
         [Display(Name = "Chủ hộ")]
         public string ChuHoId { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Địa chỉ là bắt buộc")]
+        [Display(Name = "Địa chỉ")]
+        public string DiaChi { get; set; } = string.Empty;
 
         [Display(Name = "Ghi chú")]
         public string GhiChu { get; set; } = string.Empty;
 
         [Display(Name = "Trạng thái")]
         public bool TrangThai { get; set; } = true;
+    }
+
+    public class EditHoKhauViewModel
+    {
+        public int HoKhauId { get; set; }
+
+        [Required(ErrorMessage = "Mã hộ khẩu là bắt buộc")]
+        [Display(Name = "Mã hộ khẩu")]
+        public string MaHoKhau { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Chủ hộ là bắt buộc")]
+        [Display(Name = "Chủ hộ")]
+        public string ChuHoId { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Địa chỉ là bắt buộc")]
+        [Display(Name = "Địa chỉ")]
+        public string DiaChi { get; set; } = string.Empty;
+
+        [Display(Name = "Ghi chú")]
+        public string GhiChu { get; set; } = string.Empty;
+
+        [Display(Name = "Trạng thái")]
+        public bool TrangThai { get; set; } = true;
+
+        public DateTime NgayTao { get; set; }
+
+        // For display purposes
+        public string? TenChuHo { get; set; }
     }
 
     public class NhanKhauViewModel

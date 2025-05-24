@@ -1,0 +1,89 @@
+@model QuanLyKhuDanCu.Models.YeuCauDichVu
+@{
+    ViewData["Title"] = "Hủy yêu cầu dịch vụ";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+        {
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý yêu cầu dịch vụ</a></li>
+        }
+        else
+        {
+            <li class="breadcrumb-item"><a asp-action="MyRequests">Yêu cầu của tôi</a></li>
+        }
+        <li class="breadcrumb-item active">Hủy yêu cầu</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Xác nhận hủy yêu cầu dịch vụ
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Bạn đang yêu cầu hủy dịch vụ này. Thao tác này không thể hoàn tác.
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Thông tin yêu cầu dịch vụ:</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Dịch vụ:</dt>
+                            <dd class="col-sm-8">@Model.DichVu?.TenDichVu</dd>
+
+                            <dt class="col-sm-4">Ngày yêu cầu:</dt>
+                            <dd class="col-sm-8">@Model.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                            <dt class="col-sm-4">Nội dung:</dt>
+                            <dd class="col-sm-8">@Model.NoiDung</dd>
+
+                            <dt class="col-sm-4">Trạng thái:</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.TrangThai == "ChoXuLy")
+                                {
+                                    <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                                }
+                                else if (Model.TrangThai == "DangXuLy")
+                                {
+                                    <span class="badge bg-primary">Đang xử lý</span>
+                                }
+                                else if (Model.TrangThai == "DaHoanThanh")
+                                {
+                                    <span class="badge bg-success">Đã hoàn thành</span>
+                                }
+                                else if (Model.TrangThai == "TuChoi")
+                                {
+                                    <span class="badge bg-danger">Từ chối</span>
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+
+                    <form asp-action="Cancel" method="post">
+                        <input type="hidden" asp-for="YeuCauDichVuId" />
+
+                        <div class="form-group mb-3">
+                            <label for="lyDoHuy" class="form-label">Lý do hủy:</label>
+                            <textarea name="lyDoHuy" id="lyDoHuy" class="form-control" rows="3" required></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-ban me-1"></i> Xác nhận hủy
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.YeuCauDichVuId" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

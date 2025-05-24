@@ -124,18 +124,19 @@ namespace QuanLyKhuDanCu.Controllers
         {
             if (ModelState.IsValid)
             {
-                string userId;
+                var user = await _userManager.GetUserAsync(User);
                 
-                // For staff creating on behalf of a resident
+                // For resident, use their own ID
+                string userId = user.Id;
+                
+                // For staff creating request on behalf of someone else
                 if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
                 {
-                    userId = model.UserId;
-                }
-                else
-                {
-                    // For residents creating their own requests
-                    var currentUser = await _userManager.GetUserAsync(User);
-                    userId = currentUser.Id;
+                    // If UserId is provided, use it, otherwise use the staff's ID
+                    if (!string.IsNullOrEmpty(model.UserId))
+                    {
+                        userId = model.UserId;
+                    }
                 }
                 
                 var yeuCauDichVu = new YeuCauDichVu
@@ -144,10 +145,22 @@ namespace QuanLyKhuDanCu.Controllers
                     UserId = userId,
                     NgayYeuCau = DateTime.Now,
                     NoiDung = model.NoiDung,
+                    GhiChu = model.GhiChu ?? string.Empty,
                     TrangThai = "ChoXuLy",
-                    GhiChu = model.GhiChu
+                    // Don't set NguoiXuLyId initially
+                    NguoiXuLyId = null,
+                    NgayXuLy = null,
+                    NgayHoanThanh = null
                 };
-
+                
+                // If it's staff creating the request, automatically mark it as being processed
+                if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+                {
+                    yeuCauDichVu.TrangThai = "DangXuLy";
+                    yeuCauDichVu.NguoiXuLyId = user.Id; // Set the staff member as the processor
+                    yeuCauDichVu.NgayXuLy = DateTime.Now;
+                }
+                
                 _context.Add(yeuCauDichVu);
                 await _context.SaveChangesAsync();
                 
@@ -161,17 +174,16 @@ namespace QuanLyKhuDanCu.Controllers
                 }
             }
             
-            ViewData["DichVuId"] = new SelectList(_context.DichVus.Where(d => d.TrangThai), "DichVuId", "TenDichVu", model.DichVuId);
+            // If ModelState is not valid
+            // Prepare the dropdown list for DichVu
+            ViewBag.DichVuId = new SelectList(await _context.DichVus.Where(d => d.TrangThai).ToListAsync(), "DichVuId", "TenDichVu", model.DichVuId);
             
-            // For staff creating on behalf of a resident
+            // If it's staff, prepare the user dropdown
             if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
             {
-                ViewData["UserId"] = new SelectList(_context.Users, "Id", "HoTen", model.UserId);
+                var residentsWithAccounts = await _userManager.GetUsersInRoleAsync("Resident");
+                ViewBag.UserId = new SelectList(residentsWithAccounts, "Id", "HoTen", model.UserId);
                 ViewData["IsStaff"] = true;
-            }
-            else
-            {
-                ViewData["IsStaff"] = false;
             }
             
             return View(model);
@@ -194,7 +206,8 @@ namespace QuanLyKhuDanCu.Controllers
         }
 
         // GET: YeuCauDichVu/ProcessRequest/5
-        [Authorize(Policy = "RequireStaffRole")]
+        [HttpGet]
+        [Authorize(Roles = "Admin,Manager,Staff")]
         public async Task<IActionResult> ProcessRequest(int? id)
         {
             if (id == null)
@@ -206,85 +219,118 @@ namespace QuanLyKhuDanCu.Controllers
                 .Include(y => y.DichVu)
                 .Include(y => y.User)
                 .FirstOrDefaultAsync(m => m.YeuCauDichVuId == id);
-
+                
             if (yeuCauDichVu == null)
             {
                 return NotFound();
             }
 
-            if (yeuCauDichVu.TrangThai == "DaHoanThanh" || yeuCauDichVu.TrangThai == "TuChoi")
+            // Only allow processing if the status is either ChoXuLy or DangXuLy
+            if (yeuCauDichVu.TrangThai != "ChoXuLy" && yeuCauDichVu.TrangThai != "DangXuLy")
             {
-                return BadRequest("Yêu cầu này đã được xử lý.");
+                return RedirectToAction(nameof(Details), new { id = yeuCauDichVu.YeuCauDichVuId });
             }
 
-            var viewModel = new ProcessRequestViewModel
+            var model = new ProcessRequestViewModel
             {
                 YeuCauDichVuId = yeuCauDichVu.YeuCauDichVuId,
-                TenDichVu = yeuCauDichVu.DichVu.TenDichVu,
-                NguoiYeuCau = yeuCauDichVu.User.HoTen,
+                TenDichVu = yeuCauDichVu.DichVu?.TenDichVu ?? "Không rõ",
+                NguoiYeuCau = yeuCauDichVu.User?.HoTen ?? "Không rõ",
                 NgayYeuCau = yeuCauDichVu.NgayYeuCau,
                 NoiDung = yeuCauDichVu.NoiDung,
                 TrangThai = yeuCauDichVu.TrangThai,
                 GhiChu = yeuCauDichVu.GhiChu
             };
 
-            return View(viewModel);
+            return View(model);
         }
 
         // POST: YeuCauDichVu/ProcessRequest/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "RequireStaffRole")]
-        public async Task<IActionResult> ProcessRequest(int id, ProcessRequestViewModel model)
+        [Authorize(Roles = "Admin,Manager,Staff")]
+        public async Task<IActionResult> ProcessRequest(ProcessRequestViewModel model)
         {
-            if (id != model.YeuCauDichVuId)
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var yeuCauDichVu = await _context.YeuCauDichVus.FindAsync(model.YeuCauDichVuId);
+            if (yeuCauDichVu == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            // Get current user as the processor
+            var user = await _userManager.GetUserAsync(User);
+
+            // Update status based on the selected action
+            yeuCauDichVu.TrangThai = model.Action;
+            
+            // Add timestamp to notes
+            yeuCauDichVu.GhiChu = string.IsNullOrEmpty(yeuCauDichVu.GhiChu) 
+                ? $"[{DateTime.Now:dd/MM/yyyy HH:mm}] {model.GhiChu}" 
+                : $"{yeuCauDichVu.GhiChu}\n\n[{DateTime.Now:dd/MM/yyyy HH:mm}] {model.GhiChu}";
+            
+            // If the request is accepted for processing
+            if (model.Action == "DangXuLy")
             {
-                var yeuCauDichVu = await _context.YeuCauDichVus.FindAsync(id);
-                if (yeuCauDichVu == null)
+                // Set the current user as processor if not already set
+                if (string.IsNullOrEmpty(yeuCauDichVu.NguoiXuLyId))
                 {
-                    return NotFound();
+                    yeuCauDichVu.NguoiXuLyId = user.Id;
                 }
-
-                if (yeuCauDichVu.TrangThai == "DaHoanThanh" || yeuCauDichVu.TrangThai == "TuChoi")
-                {
-                    return BadRequest("Yêu cầu này đã được xử lý.");
-                }
-
-                var user = await _userManager.GetUserAsync(User);
-
-                yeuCauDichVu.TrangThai = model.Action;
-                yeuCauDichVu.GhiChu = model.GhiChu;
-                yeuCauDichVu.NguoiXuLyId = user.Id;
                 
-                if (model.Action == "DangXuLy" && !yeuCauDichVu.NgayXuLy.HasValue)
+                // Set processing start date if not already set
+                if (!yeuCauDichVu.NgayXuLy.HasValue)
                 {
                     yeuCauDichVu.NgayXuLy = DateTime.Now;
                 }
-                else if (model.Action == "DaHoanThanh" || model.Action == "TuChoi")
-                {
-                    if (!yeuCauDichVu.NgayXuLy.HasValue)
-                    {
-                        yeuCauDichVu.NgayXuLy = DateTime.Now;
-                    }
-                    yeuCauDichVu.NgayHoanThanh = DateTime.Now;
-                }
-
-                _context.Update(yeuCauDichVu);
-                await _context.SaveChangesAsync();
-                
-                return RedirectToAction(nameof(Index));
             }
-            
-            return View(model);
+            // If the request is completed
+            else if (model.Action == "DaHoanThanh")
+            {
+                // Set completion date
+                yeuCauDichVu.NgayHoanThanh = DateTime.Now;
+                
+                // Ensure processor is set
+                if (string.IsNullOrEmpty(yeuCauDichVu.NguoiXuLyId))
+                {
+                    yeuCauDichVu.NguoiXuLyId = user.Id;
+                }
+                
+                // Ensure processing start date is set
+                if (!yeuCauDichVu.NgayXuLy.HasValue)
+                {
+                    yeuCauDichVu.NgayXuLy = DateTime.Now;
+                }
+            }
+            // If the request is rejected
+            else if (model.Action == "TuChoi")
+            {
+                // Set processor
+                if (string.IsNullOrEmpty(yeuCauDichVu.NguoiXuLyId))
+                {
+                    yeuCauDichVu.NguoiXuLyId = user.Id;
+                }
+                
+                // Set processing date
+                if (!yeuCauDichVu.NgayXuLy.HasValue)
+                {
+                    yeuCauDichVu.NgayXuLy = DateTime.Now;
+                }
+            }
+
+            _context.Update(yeuCauDichVu);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id = yeuCauDichVu.YeuCauDichVuId });
         }
 
         // GET: YeuCauDichVu/Cancel/5
-        [Authorize(Roles = "Resident")]
+        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Cancel(int? id)
         {
             if (id == null)
@@ -294,54 +340,80 @@ namespace QuanLyKhuDanCu.Controllers
 
             var yeuCauDichVu = await _context.YeuCauDichVus
                 .Include(y => y.DichVu)
+                .Include(y => y.User)
                 .FirstOrDefaultAsync(m => m.YeuCauDichVuId == id);
-
+                
             if (yeuCauDichVu == null)
             {
                 return NotFound();
             }
 
-            // Check if the request belongs to the current user
-            var user = await _userManager.GetUserAsync(User);
-            if (yeuCauDichVu.UserId != user.Id)
+            // Only allow cancellation if:
+            // 1. The user is the owner of the request and it's still pending
+            // 2. Or the user is an admin/manager/staff
+            var currentUserId = _userManager.GetUserId(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager") && !User.IsInRole("Staff"))
             {
-                return Forbid();
-            }
-
-            // Only allow cancellation of pending or in-progress requests
-            if (yeuCauDichVu.TrangThai != "ChoXuLy" && yeuCauDichVu.TrangThai != "DangXuLy")
-            {
-                return BadRequest("Không thể hủy yêu cầu đã hoàn thành hoặc từ chối.");
+                if (yeuCauDichVu.UserId != currentUserId || yeuCauDichVu.TrangThai != "ChoXuLy")
+                {
+                    return Forbid();
+                }
             }
 
             return View(yeuCauDichVu);
         }
 
         // POST: YeuCauDichVu/Cancel/5
-        [HttpPost, ActionName("Cancel")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Resident")]
-        public async Task<IActionResult> CancelConfirmed(int id)
+        [Authorize]
+        public async Task<IActionResult> Cancel(int id, string lyDoHuy)
         {
-            var yeuCauDichVu = await _context.YeuCauDichVus.FindAsync(id);
-            
-            // Check again if the request belongs to the current user
-            var user = await _userManager.GetUserAsync(User);
-            if (yeuCauDichVu.UserId != user.Id)
+            var yeuCauDichVu = await _context.YeuCauDichVus
+                .Include(y => y.DichVu)
+                .Include(y => y.User)
+                .FirstOrDefaultAsync(m => m.YeuCauDichVuId == id);
+                
+            if (yeuCauDichVu == null)
             {
-                return Forbid();
+                return NotFound();
             }
-            
-            // Only allow cancellation of pending or in-progress requests
-            if (yeuCauDichVu.TrangThai != "ChoXuLy" && yeuCauDichVu.TrangThai != "DangXuLy")
+
+            // Only allow cancellation if:
+            // 1. The user is the owner of the request and it's still pending
+            // 2. Or the user is an admin/manager/staff
+            var currentUserId = _userManager.GetUserId(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager") && !User.IsInRole("Staff"))
             {
-                return BadRequest("Không thể hủy yêu cầu đã hoàn thành hoặc từ chối.");
+                if (yeuCauDichVu.UserId != currentUserId || yeuCauDichVu.TrangThai != "ChoXuLy")
+                {
+                    return Forbid();
+                }
             }
-            
-            _context.YeuCauDichVus.Remove(yeuCauDichVu);
+
+            // Update status and add cancellation reason to the note
+            yeuCauDichVu.TrangThai = "TuChoi";
+            yeuCauDichVu.GhiChu = (string.IsNullOrEmpty(yeuCauDichVu.GhiChu) ? "" : yeuCauDichVu.GhiChu + "\n\n") + 
+                                   $"[Hủy bởi {User.Identity?.Name} - {DateTime.Now:dd/MM/yyyy HH:mm}]\nLý do: {lyDoHuy}";
+    
+            if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
+            {
+                // If it's staff canceling, set them as the processor
+                yeuCauDichVu.NguoiXuLyId = currentUserId;
+                yeuCauDichVu.NgayXuLy = DateTime.Now;
+            }
+
+            _context.Update(yeuCauDichVu);
             await _context.SaveChangesAsync();
-            
-            return RedirectToAction(nameof(MyRequests));
+
+            if (User.IsInRole("Resident"))
+            {
+                return RedirectToAction(nameof(MyRequests));
+            }
+            else
+            {
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyKhuDanCu.Models
 {
@@ -7,16 +8,27 @@ namespace QuanLyKhuDanCu.Models
     {
         [Key]
         public int ThongBaoId { get; set; }
-        public string TieuDe { get; set; }
-        public string NoiDung { get; set; }
+
+        [Required(ErrorMessage = "Tiêu đề không được để trống.")]
+        public string TieuDe { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Nội dung không được để trống.")]
+        public string NoiDung { get; set; } = string.Empty;
+
         public DateTime NgayTao { get; set; }
         public DateTime? NgayHetHan { get; set; }
-        public string DoiTuong { get; set; } // "TatCa", "QuanTri", "DanCu"
-        public bool TrangThai { get; set; }
-        public string NguoiTaoId { get; set; }
-        public string FileDinhKem { get; set; }
+
+        [Required(ErrorMessage = "Đối tượng không được để trống.")]
+        public string DoiTuong { get; set; } = string.Empty; // Ví dụ: "TatCa", "CuDan", "NhanVien"
+        public bool TrangThai { get; set; } // True: Hiển thị, False: Ẩn
+
+        [Required]
+        public string NguoiTaoId { get; set; } = string.Empty;
+
+        public string? FileDinhKem { get; set; } // Make this nullable
 
         // Navigation properties
-        public virtual ApplicationUser NguoiTao { get; set; }
+        [ForeignKey("NguoiTaoId")]
+        public virtual ApplicationUser? NguoiTao { get; set; }
     }
 }

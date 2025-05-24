@@ -1,0 +1,200 @@
+@model QuanLyKhuDanCu.Models.NhanKhau
+@{
+    ViewData["Title"] = "Thêm nhân khẩu mới";
+    var hoKhauInfo = ViewData["HoKhauInfo"] as QuanLyKhuDanCu.Models.HoKhau;
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Thêm nhân khẩu mới</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-controller="HoKhau" asp-action="Index">Hộ khẩu</a></li>
+        @if (hoKhauInfo != null)
+        {
+            <li class="breadcrumb-item"><a asp-controller="HoKhau" asp-action="Details" asp-route-id="@hoKhauInfo.HoKhauId">@hoKhauInfo.MaHoKhau</a></li>
+        }
+        <li class="breadcrumb-item active">Thêm nhân khẩu</li>
+    </ol>
+
+    @if (hoKhauInfo != null)
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Đang thêm nhân khẩu vào hộ khẩu: <strong>@hoKhauInfo.MaHoKhau</strong> - @hoKhauInfo.DiaChi
+        </div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger validation-summary-errors" data-valmsg-summary="true">
+            <span>Vui lòng sửa các lỗi sau đây và thử lại:</span>
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-user-plus me-1"></i> Thông tin nhân khẩu
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="HoTen" class="control-label">Họ và tên:</label>
+                            <input asp-for="HoTen" class="form-control" />
+                            <span asp-validation-for="HoTen" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="NgaySinh" class="control-label">Ngày sinh:</label>
+                            <input asp-for="NgaySinh" class="form-control" type="date" />
+                            <span asp-validation-for="NgaySinh" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="GioiTinh" class="control-label">Giới tính:</label>
+                            <select asp-for="GioiTinh" class="form-select">
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                            <span asp-validation-for="GioiTinh" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="CMND" class="control-label">CMND/CCCD:</label>
+                            <input asp-for="CMND" class="form-control" />
+                            <span asp-validation-for="CMND" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="SoDienThoai" class="control-label">Số điện thoại:</label>
+                            <input asp-for="SoDienThoai" class="form-control" />
+                            <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="control-label">Email:</label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="QuocTich" class="control-label">Quốc tịch:</label>
+                            <input asp-for="QuocTich" class="form-control" value="Việt Nam" />
+                            <span asp-validation-for="QuocTich" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="QuanHeVoiChuHo" class="control-label">Quan hệ với chủ hộ:</label>
+                            <select asp-for="QuanHeVoiChuHo" class="form-select">
+                                <option value="">-- Chọn quan hệ --</option>
+                                <option value="Chủ hộ">Chủ hộ</option>
+                                <option value="Vợ">Vợ</option>
+                                <option value="Chồng">Chồng</option>
+                                <option value="Con">Con</option>
+                                <option value="Bố">Bố</option>
+                                <option value="Mẹ">Mẹ</option>
+                                <option value="Anh/Chị">Anh/Chị</option>
+                                <option value="Em">Em</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                            <span asp-validation-for="QuanHeVoiChuHo" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="NgheNghiep" class="control-label">Nghề nghiệp:</label>
+                            <input asp-for="NgheNghiep" class="form-control" />
+                            <span asp-validation-for="NgheNghiep" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="NoiLamViec" class="control-label">Nơi làm việc:</label>
+                            <input asp-for="NoiLamViec" class="form-control" />
+                            <span asp-validation-for="NoiLamViec" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="HoKhauId" class="control-label">Hộ khẩu:</label>
+                            <select asp-for="HoKhauId" class="form-select" asp-items="ViewBag.HoKhauId">
+                                <option value="">-- Chọn hộ khẩu --</option>
+                            </select>
+                            <span asp-validation-for="HoKhauId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="UserId" class="control-label">Tài khoản liên kết (không bắt buộc):</label>
+                            <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId">
+                                <option value="">-- Không liên kết tài khoản --</option>
+                            </select>
+                            <span asp-validation-for="UserId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group form-check mb-3">
+                    <input class="form-check-input" asp-for="TrangThai" />
+                    <label class="form-check-label" asp-for="TrangThai">
+                        Hoạt động
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Tạo mới
+                    </button>
+                    @if (hoKhauInfo != null)
+                    {
+                        <a asp-controller="HoKhau" asp-action="Details" asp-route-id="@hoKhauInfo.HoKhauId" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại hộ khẩu
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

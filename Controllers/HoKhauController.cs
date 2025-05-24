@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhuDanCu.Data;
-using QuanLyKhuDanCu.Helpers;
 using QuanLyKhuDanCu.Models;
 using QuanLyKhuDanCu.ViewModels;
 using System;
@@ -13,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace QuanLyKhuDanCu.Controllers
 {
-    [Authorize(Policy = "RequireStaffRole")]
+    [Authorize(Roles = "Admin,Manager,Staff")]
     public class HoKhauController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -26,67 +25,13 @@ namespace QuanLyKhuDanCu.Controllers
         }
 
         // GET: HoKhau
-        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
+        public async Task<IActionResult> Index()
         {
-            ViewData["CurrentSort"] = sortOrder ?? ""; // Ensure this is never null
-            ViewData["MaSortParm"] = String.IsNullOrEmpty(sortOrder) ? "ma_desc" : "";
-            ViewData["ChuHoSortParm"] = sortOrder == "ChuHo" ? "chuho_desc" : "ChuHo";
-            ViewData["DiaChiSortParm"] = sortOrder == "DiaChi" ? "diachi_desc" : "DiaChi";
-            ViewData["NgayTaoSortParm"] = sortOrder == "NgayTao" ? "ngaytao_desc" : "NgayTao";
-
-            if (searchString != null)
-            {
-                pageNumber = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-
-            ViewData["CurrentFilter"] = searchString ?? ""; // Ensure this is never null
-
-            var hoKhaus = from h in _context.HoKhaus
-                          .Include(h => h.ChuHo)
-                          .Include(h => h.NhanKhaus)
-                          select h;
-
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                hoKhaus = hoKhaus.Where(h => h.MaHoKhau.Contains(searchString) ||
-                                           h.DiaChi.Contains(searchString) ||
-                                           h.ChuHo.HoTen.Contains(searchString));
-            }
-
-            switch (sortOrder)
-            {
-                case "ma_desc":
-                    hoKhaus = hoKhaus.OrderByDescending(h => h.MaHoKhau);
-                    break;
-                case "ChuHo":
-                    hoKhaus = hoKhaus.OrderBy(h => h.ChuHo.HoTen);
-                    break;
-                case "chuho_desc":
-                    hoKhaus = hoKhaus.OrderByDescending(h => h.ChuHo.HoTen);
-                    break;
-                case "DiaChi":
-                    hoKhaus = hoKhaus.OrderBy(h => h.DiaChi);
-                    break;
-                case "diachi_desc":
-                    hoKhaus = hoKhaus.OrderByDescending(h => h.DiaChi);
-                    break;
-                case "NgayTao":
-                    hoKhaus = hoKhaus.OrderBy(h => h.NgayTao);
-                    break;
-                case "ngaytao_desc":
-                    hoKhaus = hoKhaus.OrderByDescending(h => h.NgayTao);
-                    break;
-                default:
-                    hoKhaus = hoKhaus.OrderBy(h => h.MaHoKhau);
-                    break;
-            }
-
-            int pageSize = 10;
-            return View(await QuanLyKhuDanCu.Helpers.PaginatedList<HoKhau>.CreateAsync(hoKhaus.AsNoTracking(), pageNumber ?? 1, pageSize));
+            var hoKhaus = await _context.HoKhaus
+                .Include(h => h.ChuHo)
+                .Include(h => h.NhanKhaus)
+                .ToListAsync();
+            return View(hoKhaus);
         }
 
         // GET: HoKhau/Details/5
@@ -100,6 +45,7 @@ namespace QuanLyKhuDanCu.Controllers
             var hoKhau = await _context.HoKhaus
                 .Include(h => h.ChuHo)
                 .Include(h => h.NhanKhaus)
+                    .ThenInclude(n => n.User)
                 .FirstOrDefaultAsync(m => m.HoKhauId == id);
 
             if (hoKhau == null)
@@ -111,49 +57,66 @@ namespace QuanLyKhuDanCu.Controllers
         }
 
         // GET: HoKhau/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var users = _userManager.Users
-                .Where(u => u.TrangThai)
-                .OrderBy(u => u.HoTen)
-                .ToList();
-
-            ViewBag.ChuHoId = new SelectList(users, "Id", "HoTen");
-            return View();
+            var users = await _userManager.Users.ToListAsync();
+            ViewData["ChuHoId"] = new SelectList(users, "Id", "HoTen");
+            return View(new CreateHoKhauViewModel());
         }
 
         // POST: HoKhau/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(HoKhauViewModel viewModel)
+        public async Task<IActionResult> Create(CreateHoKhauViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                // Check if MaHoKhau already exists
-                if (_context.HoKhaus.Any(h => h.MaHoKhau == viewModel.MaHoKhau))
-                {
-                    ModelState.AddModelError("MaHoKhau", "Mã hộ khẩu đã tồn tại, vui lòng chọn mã khác.");
-                    ViewBag.ChuHoId = new SelectList(_userManager.Users.OrderBy(u => u.HoTen), "Id", "HoTen", viewModel.ChuHoId);
-                    return View(viewModel);
-                }
-
                 var hoKhau = new HoKhau
                 {
                     MaHoKhau = viewModel.MaHoKhau,
-                    DiaChi = viewModel.DiaChi,
                     ChuHoId = viewModel.ChuHoId,
+                    DiaChi = viewModel.DiaChi,
                     GhiChu = viewModel.GhiChu,
-                    NgayTao = DateTime.Now,
-                    TrangThai = true
+                    TrangThai = viewModel.TrangThai,
+                    NgayTao = DateTime.Now
                 };
 
                 _context.Add(hoKhau);
-                await _context.SaveChangesAsync();
-                TempData["Message"] = "Tạo hộ khẩu mới thành công!";
+                await _context.SaveChangesAsync(); // Save HoKhau to get its ID
+
+                // Automatically create NhanKhau for the ChuHo
+                var chuHoUser = await _userManager.FindByIdAsync(hoKhau.ChuHoId);
+                if (chuHoUser != null)
+                {
+                    var chuHoNhanKhau = new NhanKhau
+                    {
+                        HoTen = chuHoUser.HoTen,
+                        NgaySinh = chuHoUser.NgaySinh,
+                        // GioiTinh might not be available in ApplicationUser, set a default or handle appropriately
+                        GioiTinh = "Chưa rõ", // Or make NhanKhau.GioiTinh nullable
+                        CMND = chuHoUser.CMND,
+                        SoDienThoai = chuHoUser.SoDienThoai,
+                        Email = chuHoUser.Email ?? string.Empty, // Ensure Email is not null
+                        QuocTich = "Việt Nam", // Default
+                        // NgheNghiep and NoiLamViec might not be available, set defaults
+                        NgheNghiep = "Chưa rõ", // Or make NhanKhau.NgheNghiep nullable
+                        NoiLamViec = "Chưa rõ", // Or make NhanKhau.NoiLamViec nullable
+                        QuanHeVoiChuHo = "Chủ hộ",
+                        HoKhauId = hoKhau.HoKhauId, // Link to the newly created HoKhau
+                        UserId = chuHoUser.Id,      // Link to the ApplicationUser
+                        NgayDangKy = DateTime.Now,
+                        TrangThai = true
+                    };
+                    _context.NhanKhaus.Add(chuHoNhanKhau);
+                    await _context.SaveChangesAsync(); // Save the new NhanKhau
+                }
+
+                TempData["SuccessMessage"] = "Tạo hộ khẩu và nhân khẩu chủ hộ thành công!";
                 return RedirectToAction(nameof(Index));
             }
-
-            ViewBag.ChuHoId = new SelectList(_userManager.Users.OrderBy(u => u.HoTen), "Id", "HoTen", viewModel.ChuHoId);
+            
+            var users = await _userManager.Users.ToListAsync();
+            ViewData["ChuHoId"] = new SelectList(users, "Id", "HoTen", viewModel.ChuHoId);
             return View(viewModel);
         }
 
@@ -165,30 +128,33 @@ namespace QuanLyKhuDanCu.Controllers
                 return NotFound();
             }
 
-            var hoKhau = await _context.HoKhaus.FindAsync(id);
+            var hoKhau = await _context.HoKhaus.Include(h => h.ChuHo).FirstOrDefaultAsync(h => h.HoKhauId == id);
             if (hoKhau == null)
             {
                 return NotFound();
             }
 
-            var viewModel = new HoKhauViewModel
+            var viewModel = new EditHoKhauViewModel
             {
                 HoKhauId = hoKhau.HoKhauId,
                 MaHoKhau = hoKhau.MaHoKhau,
-                DiaChi = hoKhau.DiaChi,
                 ChuHoId = hoKhau.ChuHoId,
+                DiaChi = hoKhau.DiaChi,
                 GhiChu = hoKhau.GhiChu,
-                TrangThai = hoKhau.TrangThai
+                TrangThai = hoKhau.TrangThai,
+                NgayTao = hoKhau.NgayTao,
+                TenChuHo = hoKhau.ChuHo?.HoTen
             };
-
-            ViewBag.ChuHoId = new SelectList(_userManager.Users.OrderBy(u => u.HoTen), "Id", "HoTen", hoKhau.ChuHoId);
+            
+            var users = await _userManager.Users.ToListAsync();
+            ViewData["ChuHoId"] = new SelectList(users, "Id", "HoTen", hoKhau.ChuHoId);
             return View(viewModel);
         }
 
         // POST: HoKhau/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, HoKhauViewModel viewModel)
+        public async Task<IActionResult> Edit(int id, EditHoKhauViewModel viewModel)
         {
             if (id != viewModel.HoKhauId)
             {
@@ -205,23 +171,15 @@ namespace QuanLyKhuDanCu.Controllers
                         return NotFound();
                     }
 
-                    // Check if MaHoKhau already exists for a different record
-                    if (_context.HoKhaus.Any(h => h.MaHoKhau == viewModel.MaHoKhau && h.HoKhauId != id))
-                    {
-                        ModelState.AddModelError("MaHoKhau", "Mã hộ khẩu đã tồn tại, vui lòng chọn mã khác.");
-                        ViewBag.ChuHoId = new SelectList(_userManager.Users.OrderBy(u => u.HoTen), "Id", "HoTen", viewModel.ChuHoId);
-                        return View(viewModel);
-                    }
-
                     hoKhau.MaHoKhau = viewModel.MaHoKhau;
-                    hoKhau.DiaChi = viewModel.DiaChi;
                     hoKhau.ChuHoId = viewModel.ChuHoId;
+                    hoKhau.DiaChi = viewModel.DiaChi;
                     hoKhau.GhiChu = viewModel.GhiChu;
                     hoKhau.TrangThai = viewModel.TrangThai;
 
                     _context.Update(hoKhau);
                     await _context.SaveChangesAsync();
-                    TempData["Message"] = "Cập nhật hộ khẩu thành công!";
+                    TempData["SuccessMessage"] = "Cập nhật hộ khẩu thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -234,10 +192,11 @@ namespace QuanLyKhuDanCu.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Details), new { id = viewModel.HoKhauId });
             }
-
-            ViewBag.ChuHoId = new SelectList(_userManager.Users.OrderBy(u => u.HoTen), "Id", "HoTen", viewModel.ChuHoId);
+            
+            var users = await _userManager.Users.ToListAsync();
+            ViewData["ChuHoId"] = new SelectList(users, "Id", "HoTen", viewModel.ChuHoId);
             return View(viewModel);
         }
 
@@ -251,18 +210,10 @@ namespace QuanLyKhuDanCu.Controllers
 
             var hoKhau = await _context.HoKhaus
                 .Include(h => h.ChuHo)
-                .Include(h => h.NhanKhaus)
                 .FirstOrDefaultAsync(m => m.HoKhauId == id);
-
             if (hoKhau == null)
             {
                 return NotFound();
-            }
-
-            if (hoKhau.NhanKhaus.Count > 0)
-            {
-                TempData["Error"] = "Không thể xóa hộ khẩu đang có nhân khẩu!";
-                return RedirectToAction(nameof(Index));
             }
 
             return View(hoKhau);
@@ -274,21 +225,12 @@ namespace QuanLyKhuDanCu.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var hoKhau = await _context.HoKhaus.FindAsync(id);
-
             if (hoKhau != null)
             {
-                var nhanKhauCount = await _context.NhanKhaus.CountAsync(n => n.HoKhauId == id);
-                if (nhanKhauCount > 0)
-                {
-                    TempData["Error"] = "Không thể xóa hộ khẩu đang có nhân khẩu!";
-                    return RedirectToAction(nameof(Index));
-                }
-
                 _context.HoKhaus.Remove(hoKhau);
-                await _context.SaveChangesAsync();
-                TempData["Message"] = "Xóa hộ khẩu thành công!";
             }
 
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

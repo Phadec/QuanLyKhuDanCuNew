@@ -1,0 +1,123 @@
+@model IEnumerable<QuanLyKhuDanCu.Models.NhanKhau>
+@{
+    ViewData["Title"] = "Quản lý Nhân khẩu";
+    var hoKhauInfo = ViewData["HoKhauInfo"] as QuanLyKhuDanCu.Models.HoKhau;
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Quản lý Nhân khẩu</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        @if (hoKhauInfo != null)
+        {
+            <li class="breadcrumb-item"><a asp-controller="HoKhau" asp-action="Index">Hộ khẩu</a></li>
+            <li class="breadcrumb-item"><a asp-controller="HoKhau" asp-action="Details" asp-route-id="@hoKhauInfo.HoKhauId">@hoKhauInfo.MaHoKhau</a></li>
+            <li class="breadcrumb-item active">Nhân khẩu</li>
+        }
+        else
+        {
+            <li class="breadcrumb-item active">Nhân khẩu</li>
+        }
+    </ol>
+
+    @if (hoKhauInfo != null)
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Danh sách nhân khẩu thuộc hộ khẩu: <strong>@hoKhauInfo.MaHoKhau</strong> - @hoKhauInfo.DiaChi
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-table me-1"></i> 
+                @if (hoKhauInfo != null)
+                {
+                    <text>Danh sách Nhân khẩu - @hoKhauInfo.MaHoKhau</text>
+                }
+                else
+                {
+                    <text>Danh sách Nhân khẩu</text>
+                }
+            </div>
+            <a asp-action="Create" asp-route-hoKhauId="@(hoKhauInfo?.HoKhauId)" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Thêm Nhân khẩu mới
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Họ tên</th>
+                            <th>Ngày sinh</th>
+                            <th>Giới tính</th>
+                            <th>CMND/CCCD</th>
+                            <th>Quan hệ với chủ hộ</th>
+                            @if (hoKhauInfo == null)
+                            {
+                                <th>Hộ khẩu</th>
+                            }
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.HoTen)</td>
+                                <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
+                                <td>@Html.DisplayFor(modelItem => item.GioiTinh)</td>
+                                <td>@Html.DisplayFor(modelItem => item.CMND)</td>
+                                <td>@Html.DisplayFor(modelItem => item.QuanHeVoiChuHo)</td>
+                                @if (hoKhauInfo == null)
+                                {
+                                    <td>@Html.DisplayFor(modelItem => item.HoKhau.MaHoKhau)</td>
+                                }
+                                <td>
+                                    @if (item.TrangThai)
+                                    {
+                                        <span class="badge bg-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Không hoạt động</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.NhanKhauId" class="btn btn-sm btn-info" title="Chi tiết">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.NhanKhauId" class="btn btn-sm btn-warning" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.NhanKhauId" class="btn btn-sm btn-danger" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            @if (hoKhauInfo != null)
+            {
+                <a asp-controller="HoKhau" asp-action="Details" asp-route-id="@hoKhauInfo.HoKhauId" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại hộ khẩu
+                </a>
+            }
+            else
+            {
+                <a asp-controller="HoKhau" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-home me-1"></i> Danh sách hộ khẩu
+                </a>
+            }
+        </div>
+    </div>
+</div>

@@ -1,4 +1,5 @@
 @model QuanLyKhuDanCu.ViewModels.ThongBaoViewModel
+@using System.IO
 @{
     ViewData["Title"] = "Chỉnh sửa thông báo";
 }
@@ -57,21 +58,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="FileDinhKem" class="control-label">File đính kèm:</label>
-                    <div class="custom-file">
-                        <input asp-for="FileDinhKem" class="custom-file-input" id="customFile" />
-                        <label class="custom-file-label" for="customFile">@(string.IsNullOrEmpty(Model.ExistingFilePath) ? "Chọn file..." : Model.ExistingFilePath)</label>
-                    </div>
+                    <label asp-for="FileDinhKemUpload" class="control-label">File đính kèm:</label>
                     @if (!string.IsNullOrEmpty(Model.ExistingFilePath))
                     {
-                        <small class="form-text text-muted">
-                            File hiện tại: @Model.ExistingFilePath
-                            <a asp-action="DownloadFile" asp-route-id="@Model.ThongBaoId" class="ml-2">
-                                <i class="fas fa-download"></i> Tải xuống
-                            </a>
-                        </small>
+                        <div class="mb-2">
+                            <span>Tệp hiện tại: </span>
+                            <a href="~/@Model.ExistingFilePath.Replace("\\", "/")" target="_blank">@System.IO.Path.GetFileName(Model.ExistingFilePath)</a>
+                            <input type="checkbox" name="removeExistingFile" id="removeExistingFile" value="true" class="form-check-input ms-2" />
+                            <label class="form-check-label" for="removeExistingFile">Xóa tệp hiện tại</label>
+                        </div>
                     }
-                    <small class="form-text text-muted">Chọn file mới nếu muốn thay thế file hiện tại.</small>
+                    <input asp-for="FileDinhKemUpload" type="file" class="form-control" />
+                    <span asp-validation-for="FileDinhKemUpload" class="text-danger"></span>
                 </div>
 
                 <div class="form-group form-check mt-3">
@@ -94,11 +92,4 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
-        // Update custom file input label with selected file name
-        $(".custom-file-input").on("change", function () {
-            var fileName = $(this).val().split("\\").pop();
-            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-        });
-    </script>
 }

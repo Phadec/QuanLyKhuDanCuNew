@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyKhuDanCu.Models
 {
@@ -7,19 +8,38 @@ namespace QuanLyKhuDanCu.Models
     {
         [Key]
         public int YeuCauDichVuId { get; set; }
+        
         public int DichVuId { get; set; }
-        public string UserId { get; set; }
+        
+        [Required]
+        public string UserId { get; set; } = string.Empty;
+        
         public DateTime NgayYeuCau { get; set; }
-        public string NoiDung { get; set; }
-        public string TrangThai { get; set; } // "ChoXuLy", "DangXuLy", "DaHoanThanh", "TuChoi"
-        public string GhiChu { get; set; }
-        public string NguoiXuLyId { get; set; }
+        
+        [Required]
+        public string NoiDung { get; set; } = string.Empty;
+        
+        [Required]
+        public string TrangThai { get; set; } = string.Empty;
+        
+        [Required]
+        public string GhiChu { get; set; } = string.Empty;
+        
+        // Make NguoiXuLyId nullable since it won't be set initially
+        public string? NguoiXuLyId { get; set; }
+        
         public DateTime? NgayXuLy { get; set; }
+        
         public DateTime? NgayHoanThanh { get; set; }
-
+        
         // Navigation properties
-        public virtual DichVu DichVu { get; set; }
-        public virtual ApplicationUser User { get; set; }
-        public virtual ApplicationUser NguoiXuLy { get; set; }
+        [ForeignKey("DichVuId")]
+        public DichVu? DichVu { get; set; }
+        
+        [ForeignKey("UserId")]
+        public ApplicationUser? User { get; set; }
+        
+        [ForeignKey("NguoiXuLyId")]
+        public ApplicationUser? NguoiXuLy { get; set; }
     }
 }

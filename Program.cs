@@ -63,10 +63,46 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         
-        // Create database if it doesn't exist and apply migrations
-        context.Database.Migrate();
+        // Ensure database is created and apply migrations
+        context.Database.EnsureCreated();
         
-        // Seed data with the correct namespace
+        // Update database schema directly if needed
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+            connection.Open();
+            
+        using (var command = connection.CreateCommand())
+        {
+            // Make ThongBao.FileDinhKem nullable
+            command.CommandText = @"
+                ALTER TABLE ThongBaos MODIFY COLUMN FileDinhKem longtext NULL;";
+            try { command.ExecuteNonQuery(); } catch (Exception ex) { 
+                Console.WriteLine("Error making FileDinhKem nullable: " + ex.Message); 
+            }
+            
+            // Make YeuCauDichVus.NguoiXuLyId nullable
+            command.CommandText = @"
+                ALTER TABLE YeuCauDichVus MODIFY COLUMN NguoiXuLyId varchar(255) NULL;";
+            try { command.ExecuteNonQuery(); } catch (Exception ex) { 
+                Console.WriteLine("Error making NguoiXuLyId nullable: " + ex.Message); 
+            }
+            
+            // Make PhanAnhs.FileDinhKem nullable
+            command.CommandText = @"
+                ALTER TABLE PhanAnhs MODIFY COLUMN FileDinhKem longtext NULL;";
+            try { command.ExecuteNonQuery(); } catch (Exception ex) { 
+                Console.WriteLine("Error making PhanAnhs.FileDinhKem nullable: " + ex.Message); 
+            }
+            
+            // Make GhiChu fields nullable
+            command.CommandText = @"
+                ALTER TABLE HoKhaus MODIFY COLUMN GhiChu longtext NULL;";
+            try { command.ExecuteNonQuery(); } catch (Exception ex) { 
+                Console.WriteLine("Error making HoKhaus.GhiChu nullable: " + ex.Message); 
+            }
+        }
+        
+        // Seed data
         await QuanLyKhuDanCu.Data.Seeders.DataSeeder.SeedDataAsync(services);
     }
     catch (Exception ex)

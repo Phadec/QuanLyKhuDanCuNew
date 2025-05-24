@@ -214,45 +214,53 @@ namespace QuanLyKhuDanCu.Controllers
         // POST: PhanAnh/ProcessFeedback/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "RequireStaffRole")]
-        public async Task<IActionResult> ProcessFeedback(int id, ProcessFeedbackViewModel model)
+        [Authorize(Roles = "Admin,Manager,Staff")]
+        public async Task<IActionResult> ProcessFeedback(ProcessFeedbackViewModel model)
         {
-            if (id != model.PhanAnhId)
+            var phanAnhEntity = await _context.PhanAnhs
+                                  .Include(p => p.User) // Include user for NguoiGui if needed for reload
+                                  .FirstOrDefaultAsync(p => p.PhanAnhId == model.PhanAnhId);
+    
+            if (phanAnhEntity == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var phanAnh = await _context.PhanAnhs.FindAsync(id);
-                if (phanAnh == null)
-                {
-                    return NotFound();
-                }
-
-                if (phanAnh.TrangThai == "DaXuLy")
-                {
-                    return BadRequest("Phản ánh này đã được xử lý.");
-                }
-
-                var user = await _userManager.GetUserAsync(User);
-
-                phanAnh.TrangThai = model.Action;
-                phanAnh.PhanHoi = model.PhanHoi;
-                phanAnh.NguoiXuLyId = user.Id;
-                
-                if (model.Action == "DaXuLy")
-                {
-                    phanAnh.NgayXuLy = DateTime.Now;
-                }
-
-                _context.Update(phanAnh);
-                await _context.SaveChangesAsync();
-                
-                return RedirectToAction(nameof(Index));
+                // Repopulate non-posted fields for the view model if returning the view
+                model.TieuDe = phanAnhEntity.TieuDe;
+                model.NoiDung = phanAnhEntity.NoiDung;
+                model.NguoiGui = phanAnhEntity.User?.HoTen ?? "Không rõ";
+                model.NgayTao = phanAnhEntity.NgayTao;
+                model.TrangThai = phanAnhEntity.TrangThai; // Keep current status for display
+                return View(model);
             }
-            
-            return View(model);
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                // This should not happen due to [Authorize] but as a safeguard
+                ModelState.AddModelError("", "Không thể xác định người dùng hiện tại.");
+                // Repopulate non-posted fields
+                model.TieuDe = phanAnhEntity.TieuDe;
+                model.NoiDung = phanAnhEntity.NoiDung;
+                model.NguoiGui = phanAnhEntity.User?.HoTen ?? "Không rõ";
+                model.NgayTao = phanAnhEntity.NgayTao;
+                model.TrangThai = phanAnhEntity.TrangThai;
+                return View(model);
+            }
+    
+            phanAnhEntity.TrangThai = model.Action;
+            phanAnhEntity.PhanHoi = model.PhanHoi;
+            phanAnhEntity.NguoiXuLyId = user.Id; // user is confirmed not null here
+            phanAnhEntity.NgayXuLy = DateTime.Now;
+
+            _context.Update(phanAnhEntity);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Phản ánh đã được xử lý thành công.";
+            return RedirectToAction(nameof(Details), new { id = phanAnhEntity.PhanAnhId });
         }
 
         // GET: PhanAnh/Delete/5

@@ -90,34 +90,4 @@ namespace QuanLyKhuDanCu.ViewModels
         [Display(Name = "File đính kèm")]
         public IFormFile? FileDinhKem { get; set; }
     }
-
-    // ProcessFeedbackViewModel for handling feedback
-    public class ProcessFeedbackViewModel
-    {
-        public int PhanAnhId { get; set; }
-
-        [Required(ErrorMessage = "Tiêu đề không được để trống")]
-        [Display(Name = "Tiêu đề")]
-        public string TieuDe { get; set; } = string.Empty;
-
-        [Display(Name = "Nội dung")]
-        public string NoiDung { get; set; } = string.Empty;
-
-        [Display(Name = "Người gửi")]
-        public string NguoiGui { get; set; } = string.Empty;
-
-        [Display(Name = "Trạng thái")]
-        public string TrangThai { get; set; } = string.Empty;
-        
-        [Display(Name = "Ngày tạo")]
-        public DateTime NgayTao { get; set; }
-
-        [Required(ErrorMessage = "Hành động xử lý không được để trống")]
-        [Display(Name = "Hành động")]
-        public string Action { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Phản hồi không được để trống")]
-        [Display(Name = "Phản hồi")]
-        public string PhanHoi { get; set; } = string.Empty;
-    }
 }

@@ -34,7 +34,7 @@ namespace QuanLyKhuDanCu.Data.Seeders
                     DoiTuong = "TatCa",
                     TrangThai = true,
                     NguoiTaoId = adminUser.Id,
-                    FileDinhKem = string.Empty
+                    FileDinhKem = null // Use null if no file
                 },
                 new ThongBao
                 {
@@ -45,7 +45,7 @@ namespace QuanLyKhuDanCu.Data.Seeders
                     DoiTuong = "TatCa",
                     TrangThai = true,
                     NguoiTaoId = adminUser.Id,
-                    FileDinhKem = string.Empty
+                    FileDinhKem = null // Use null if no file
                 },
                 new ThongBao
                 {
@@ -56,7 +56,7 @@ namespace QuanLyKhuDanCu.Data.Seeders
                     DoiTuong = "TatCa",
                     TrangThai = true,
                     NguoiTaoId = adminUser.Id,
-                    FileDinhKem = string.Empty
+                    FileDinhKem = null // Use null if no file
                 },
                 new ThongBao
                 {
@@ -67,7 +67,7 @@ namespace QuanLyKhuDanCu.Data.Seeders
                     DoiTuong = "TatCa",
                     TrangThai = true,
                     NguoiTaoId = adminUser.Id,
-                    FileDinhKem = string.Empty
+                    FileDinhKem = null // Use null if no file
                 },
                 new ThongBao
                 {
@@ -78,7 +78,7 @@ namespace QuanLyKhuDanCu.Data.Seeders
                     DoiTuong = "Staff",
                     TrangThai = true,
                     NguoiTaoId = adminUser.Id,
-                    FileDinhKem = string.Empty
+                    FileDinhKem = null // Use null if no file
                 }
             };
 

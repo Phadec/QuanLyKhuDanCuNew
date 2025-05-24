@@ -1,0 +1,130 @@
+@model QuanLyKhuDanCu.ViewModels.ProcessRequestViewModel
+@{
+    ViewData["Title"] = "Xử lý yêu cầu dịch vụ";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý yêu cầu dịch vụ</a></li>
+        <li class="breadcrumb-item active">Xử lý yêu cầu</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-cogs me-1"></i>
+                    Thông tin xử lý yêu cầu
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Thông tin yêu cầu:</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Dịch vụ:</dt>
+                            <dd class="col-sm-8">@Model.TenDichVu</dd>
+
+                            <dt class="col-sm-4">Người yêu cầu:</dt>
+                            <dd class="col-sm-8">@Model.NguoiYeuCau</dd>
+
+                            <dt class="col-sm-4">Ngày yêu cầu:</dt>
+                            <dd class="col-sm-8">@Model.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                            <dt class="col-sm-4">Nội dung:</dt>
+                            <dd class="col-sm-8">@Model.NoiDung</dd>
+
+                            <dt class="col-sm-4">Trạng thái hiện tại:</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.TrangThai == "ChoXuLy")
+                                {
+                                    <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                                }
+                                else if (Model.TrangThai == "DangXuLy")
+                                {
+                                    <span class="badge bg-primary">Đang xử lý</span>
+                                }
+                                else if (Model.TrangThai == "DaHoanThanh")
+                                {
+                                    <span class="badge bg-success">Đã hoàn thành</span>
+                                }
+                                else if (Model.TrangThai == "TuChoi")
+                                {
+                                    <span class="badge bg-danger">Từ chối</span>
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+
+                    <form asp-action="ProcessRequest" method="post">
+                        <input type="hidden" asp-for="YeuCauDichVuId" />
+                        <input type="hidden" asp-for="TenDichVu" />
+                        <input type="hidden" asp-for="NguoiYeuCau" />
+                        <input type="hidden" asp-for="NgayYeuCau" />
+                        <input type="hidden" asp-for="NoiDung" />
+                        <input type="hidden" asp-for="TrangThai" />
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Action" class="form-label">Hành động xử lý:</label>
+                            <select asp-for="Action" class="form-select">
+                                @if (Model.TrangThai == "ChoXuLy")
+                                {
+                                    <option value="DangXuLy">Tiếp nhận xử lý</option>
+                                    <option value="TuChoi">Từ chối yêu cầu</option>
+                                }
+                                else if (Model.TrangThai == "DangXuLy")
+                                {
+                                    <option value="DaHoanThanh">Hoàn thành xử lý</option>
+                                    <option value="TuChoi">Từ chối yêu cầu</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Action" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="GhiChu" class="form-label">Ghi chú xử lý:</label>
+                            <textarea asp-for="GhiChu" class="form-control" rows="4" placeholder="Nhập ghi chú về việc xử lý yêu cầu (cách thức xử lý, lý do từ chối, v.v...)"></textarea>
+                            <span asp-validation-for="GhiChu" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Lưu thay đổi
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.YeuCauDichVuId" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Hướng dẫn xử lý
+                </div>
+                <div class="card-body">
+                    <h5>Tiếp nhận xử lý</h5>
+                    <p>Khi tiếp nhận yêu cầu, bạn sẽ được ghi nhận là người xử lý chính của yêu cầu này.</p>
+                    
+                    <h5>Hoàn thành xử lý</h5>
+                    <p>Khi hoàn thành xử lý, yêu cầu sẽ được chuyển sang trạng thái "Đã hoàn thành" và người dùng sẽ nhận được thông báo.</p>
+                    
+                    <h5>Từ chối yêu cầu</h5>
+                    <p>Nếu yêu cầu không thể thực hiện được, bạn có thể từ chối với lý do cụ thể.</p>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-exclamation-circle me-1"></i> Hãy cung cấp đầy đủ thông tin trong phần ghi chú để người dùng hiểu rõ về tình trạng xử lý yêu cầu của họ.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

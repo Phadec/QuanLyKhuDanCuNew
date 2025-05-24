@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using QuanLyKhuDanCu.Data.Seeders;
 using QuanLyKhuDanCu.Models;
 using System;
@@ -13,31 +14,29 @@ namespace QuanLyKhuDanCu.Data
         {
             using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
-            
-            try
-            {
+
+       
                 var context = services.GetRequiredService<ApplicationDbContext>();
                 var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                // Seed basic data
+                // Seed basic data (Roles, Admin User)
                 await SeedData.Initialize(userManager, roleManager);
-                
+
+                // Seed Users (Manager, Staff, Residents) - Create UserSeeder first
+                await UserSeeder.SeedUsersAsync(userManager);
+
                 // Seed additional data
                 await DichVuSeeder.SeedDichVuAsync(context);
                 await LoaiPhiSeeder.SeedLoaiPhiAsync(context);
                 await ThongBaoSeeder.SeedThongBaoAsync(context, userManager);
-                
+
+                // Seed HoKhau first, then NhanKhau
+                await HoKhauSeeder.SeedHoKhauAsync(context, userManager);
+                await NhanKhauSeeder.SeedNhanKhauAsync(context, userManager);
+
                 // You can add more seeders here
-            }
-            catch (Exception ex)
-            {
-                // Get logger and log the error
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "An error occurred while seeding the database.");
-            }
+            } 
         }
     }
-}
 
-// If this file exists, it should be deleted or renamed to avoid ambiguity with the new DataSeeder class in QuanLyKhuDanCu.Data.Seeders namespace

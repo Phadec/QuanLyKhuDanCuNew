@@ -69,16 +69,24 @@
                         <div class="form-group">
                             <label asp-for="Action" class="control-label">Trạng thái xử lý:</label>
                             <select asp-for="Action" class="form-control">
-                                <option value="DangXuLy">Đang xử lý</option>
-                                <option value="DaXuLy">Đã xử lý</option>
+                                @if (Model.TrangThai == "ChoXuLy")
+                                {
+                                    <option value="DangXuLy">Tiếp nhận và bắt đầu xử lý</option>
+                                    <option value="DaXuLy">Xử lý ngay và hoàn thành</option>
+                                }
+                                else if (Model.TrangThai == "DangXuLy")
+                                {
+                                    <option value="DaXuLy">Hoàn thành xử lý</option>
+                                }
                             </select>
                             <span asp-validation-for="Action" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
                             <label asp-for="PhanHoi" class="control-label">Nội dung phản hồi:</label>
-                            <textarea asp-for="PhanHoi" class="form-control" rows="6" placeholder="Nhập phản hồi của bạn..."></textarea>
+                            <textarea asp-for="PhanHoi" class="form-control" rows="6" placeholder="Nhập phản hồi của bạn..." required></textarea>
                             <span asp-validation-for="PhanHoi" class="text-danger"></span>
+                            <small class="form-text text-muted">Vui lòng cung cấp phản hồi chi tiết về cách xử lý vấn đề này.</small>
                         </div>
 
                         <div class="form-group mt-4">

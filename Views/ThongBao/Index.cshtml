@@ -4,170 +4,157 @@
     ViewData["Title"] = "Thông báo";
 }
 
-<div class="container-fluid">
-    <h1 class="mt-4">Thông báo</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-        <li class="breadcrumb-item active">Thông báo</li>
-    </ol>
+<h1>@ViewData["Title"]</h1>
 
-    <div class="row mb-4">
-        <div class="col-12">
-            @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Staff"))
-            {
-                <a asp-action="Create" class="btn btn-primary">
-                    <i class="fas fa-plus-circle mr-1"></i> Tạo thông báo mới
-                </a>
-            }
-        </div>
+@if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Tạo thông báo mới
+        </a>
+    </p>
+}
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-filter mr-1"></i>
+        Tìm kiếm
     </div>
-
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-filter mr-1"></i>
-            Tìm kiếm
-        </div>
-        <div class="card-body">
-            <form asp-action="Index" method="get">
-                <div class="input-group">
-                    <input type="text" class="form-control" name="searchString" value="@Context.Request.Query["searchString"]" placeholder="Tìm kiếm tiêu đề hoặc nội dung thông báo..." />
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Tìm kiếm</button>
-                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-undo"></i> Đặt lại</a>
-                    </div>
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="input-group">
+                <input type="text" class="form-control" name="searchString" value="@Context.Request.Query["searchString"]" placeholder="Tìm kiếm tiêu đề hoặc nội dung thông báo..." />
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Tìm kiếm</button>
+                    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-undo"></i> Đặt lại</a>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
+</div>
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle mr-1"></i> Không có thông báo nào.
-        </div>
-    }
-    else
-    {
-        <div class="row">
-            @foreach (var item in Model)
-            {
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 @(item.NgayHetHan.HasValue && item.NgayHetHan.Value < DateTime.Now ? "border-secondary" : "")">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 text-primary">
-                                <i class="fas fa-bullhorn mr-1"></i> @item.TieuDe
-                            </h5>
-                            @if (item.NgayHetHan.HasValue && item.NgayHetHan.Value < DateTime.Now)
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle mr-1"></i> Không có thông báo nào.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Tiêu đề</th>
+                    <th>Ngày tạo</th>
+                    <th>Ngày hết hạn</th>
+                    <th>Đối tượng</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.TieuDe</td>
+                        <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
+                        <td>@(item.NgayHetHan?.ToString("dd/MM/yyyy") ?? "Không có")</td>
+                        <td>
+                            @if (item.DoiTuong == "TatCa")
                             {
-                                <span class="badge badge-secondary">Đã hết hạn</span>
+                                <span class="badge bg-primary">Tất cả</span>
                             }
-                            else if (!item.TrangThai)
+                            else
                             {
-                                <span class="badge badge-secondary">Ẩn</span>
+                                <span class="badge bg-secondary">@item.DoiTuong</span>
                             }
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">
-                                @if (item.NoiDung != null && item.NoiDung.Length > 200)
+                        </td>
+                        <td>
+                            @if (item.TrangThai)
+                            {
+                                <span class="badge bg-success">Hiển thị</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Ẩn</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a asp-action="Details" asp-route-id="@item.ThongBaoId" class="btn btn-sm btn-info" title="Chi tiết">
+                                    <i class="fas fa-info-circle"></i>
+                                </a>
+                                @if (User.IsInRole("Admin") || User.IsInRole("Manager") || (User.IsInRole("Staff") && User.Identity?.Name == item.NguoiTao.UserName))
                                 {
-                                    @(item.NoiDung.Substring(0, 200) + "...")
-                                }
-                                else
-                                {
-                                    @item.NoiDung
-                                }
-                            </p>
-                            
-                            <div class="mt-2 d-flex justify-content-between">
-                                <small class="text-muted">
-                                    <i class="fas fa-user mr-1"></i> @item.NguoiTao.HoTen
-                                    <i class="fas fa-calendar-alt ml-2 mr-1"></i> @item.NgayTao.ToString("dd/MM/yyyy HH:mm")
-                                </small>
-                                
-                                @if (!string.IsNullOrEmpty(item.FileDinhKem))
-                                {
-                                    <span>
-                                        <i class="fas fa-paperclip text-muted"></i>
-                                    </span>
+                                    <a asp-action="Edit" asp-route-id="@item.ThongBaoId" class="btn btn-sm btn-primary" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.ThongBaoId" class="btn btn-sm btn-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
                                 }
                             </div>
-                        </div>
-                        <div class="card-footer bg-transparent d-flex justify-content-between">
-                            <a asp-action="Details" asp-route-id="@item.ThongBaoId" class="btn btn-sm btn-info">
-                                <i class="fas fa-eye mr-1"></i> Xem chi tiết
-                            </a>
-                            
-                            @if (User.IsInRole("Admin") || (User.Identity.Name == item.NguoiTao.UserName))
-                            {
-                                <div>
-                                    <a asp-action="Edit" asp-route-id="@item.ThongBaoId" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-edit mr-1"></i> Sửa
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.ThongBaoId" class="btn btn-sm btn-danger">
-                                        <i class="fas fa-trash mr-1"></i> Xóa
-                                    </a>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div>
+            Hiển thị @Model.Count trên tổng số @Model.TotalItems mục
         </div>
+        <div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-page="1" asp-route-searchString="@Context.Request.Query["searchString"]">Đầu</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageIndex - 1)" asp-route-searchString="@Context.Request.Query["searchString"]">Trước</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">Đầu</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">Trước</a>
+                        </li>
+                    }
 
-        <div class="d-flex justify-content-between align-items-center mt-4">
-            <div>
-                Hiển thị @Model.Count trên tổng số @Model.TotalItems mục
-            </div>
-            <div>
-                <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        @if (Model.HasPreviousPage)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" asp-action="Index" asp-route-page="1" asp-route-searchString="@Context.Request.Query["searchString"]">Đầu</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageIndex - 1)" asp-route-searchString="@Context.Request.Query["searchString"]">Trước</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#">Đầu</a>
-                            </li>
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#">Trước</a>
-                            </li>
-                        }
+                    @for (int i = Math.Max(1, Model.PageIndex - 2); i <= Math.Min(Model.TotalPages, Model.PageIndex + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-searchString="@Context.Request.Query["searchString"]">@i</a>
+                        </li>
+                    }
 
-                        @for (int i = Math.Max(1, Model.PageIndex - 2); i <= Math.Min(Model.TotalPages, Model.PageIndex + 2); i++)
-                        {
-                            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                                <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-searchString="@Context.Request.Query["searchString"]">@i</a>
-                            </li>
-                        }
-
-                        @if (Model.HasNextPage)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageIndex + 1)" asp-route-searchString="@Context.Request.Query["searchString"]">Tiếp</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" asp-action="Index" asp-route-page="@Model.TotalPages" asp-route-searchString="@Context.Request.Query["searchString"]">Cuối</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#">Tiếp</a>
-                            </li>
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#">Cuối</a>
-                            </li>
-                        }
-                    </ul>
-                </nav>
-            </div>
+                    @if (Model.HasNextPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageIndex + 1)" asp-route-searchString="@Context.Request.Query["searchString"]">Tiếp</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-page="@Model.TotalPages" asp-route-searchString="@Context.Request.Query["searchString"]">Cuối</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">Tiếp</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">Cuối</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
         </div>
-    }
-</div>
+    </div>
+}
