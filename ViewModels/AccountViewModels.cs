@@ -104,4 +104,34 @@ namespace QuanLyKhuDanCu.ViewModels
         [Compare("NewPassword", ErrorMessage = "Mật khẩu và xác nhận mật khẩu không khớp.")]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
+
+    public class EditProfileViewModel
+    {
+        [Required(ErrorMessage = "Email không được để trống")]
+        [EmailAddress(ErrorMessage = "Email không đúng định dạng")]
+        [Display(Name = "Email")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Họ tên không được để trống")]
+        [Display(Name = "Họ tên")]
+        public string HoTen { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Ngày sinh không được để trống")]
+        [DataType(DataType.Date)]
+        [Display(Name = "Ngày sinh")]
+        public DateTime NgaySinh { get; set; }
+
+        [Required(ErrorMessage = "Địa chỉ không được để trống")]
+        [Display(Name = "Địa chỉ")]
+        public string DiaChi { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "CMND/CCCD không được để trống")]
+        [Display(Name = "CMND/CCCD")]
+        public string CMND { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Số điện thoại không được để trống")]
+        [Phone(ErrorMessage = "Số điện thoại không đúng định dạng")]
+        [Display(Name = "Số điện thoại")]
+        public string SoDienThoai { get; set; } = string.Empty;
+    }
 }
