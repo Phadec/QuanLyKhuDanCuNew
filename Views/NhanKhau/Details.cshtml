@@ -1,0 +1,158 @@
+@model QuanLyKhuDanCu.Models.NhanKhau
+@{
+    ViewData["Title"] = "Chi tiết Nhân khẩu";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Chi tiết Nhân khẩu</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Nhân khẩu</a></li>
+        <li class="breadcrumb-item active">Chi tiết</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user me-1"></i> Thông tin Cá nhân
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Họ và tên:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.HoTen)</dd>
+
+                        <dt class="col-sm-4">Ngày sinh:</dt>
+                        <dd class="col-sm-8">@Model.NgaySinh.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Giới tính:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.GioiTinh)</dd>
+
+                        <dt class="col-sm-4">CMND/CCCD:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.CMND)</dd>
+
+                        <dt class="col-sm-4">Số điện thoại:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.SoDienThoai)</dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
+
+                        <dt class="col-sm-4">Quốc tịch:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.QuocTich)</dd>
+
+                        <dt class="col-sm-4">Nghề nghiệp:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.NgheNghiep)</dd>
+
+                        <dt class="col-sm-4">Nơi làm việc:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.NoiLamViec)</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-home me-1"></i> Thông tin Hộ khẩu
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-5">Quan hệ với chủ hộ:</dt>
+                        <dd class="col-sm-7">@Html.DisplayFor(model => model.QuanHeVoiChuHo)</dd>
+
+                        @if (Model.HoKhau != null)
+                        {
+                            <dt class="col-sm-5">Mã hộ khẩu:</dt>
+                            <dd class="col-sm-7">
+                                <a asp-controller="HoKhau" asp-action="Details" asp-route-id="@Model.HoKhau.HoKhauId">
+                                    @Model.HoKhau.MaHoKhau
+                                </a>
+                            </dd>
+
+                            <dt class="col-sm-5">Địa chỉ:</dt>
+                            <dd class="col-sm-7">@Model.HoKhau.DiaChi</dd>
+
+                            <dt class="col-sm-5">Chủ hộ:</dt>
+                            <dd class="col-sm-7">@Model.HoKhau.ChuHo?.HoTen</dd>
+                        }
+
+                        <dt class="col-sm-5">Ngày đăng ký:</dt>
+                        <dd class="col-sm-7">@Model.NgayDangKy.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-5">Trạng thái:</dt>
+                        <dd class="col-sm-7">
+                            @if (Model.TrangThai)
+                            {
+                                <span class="badge bg-success">Hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Không hoạt động</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (Model.User != null)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-user-cog me-1"></i> Thông tin Tài khoản
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-5">Tên đăng nhập:</dt>
+                            <dd class="col-sm-7">@Model.User.UserName</dd>
+
+                            <dt class="col-sm-5">Email tài khoản:</dt>
+                            <dd class="col-sm-7">@Model.User.Email</dd>
+
+                            <dt class="col-sm-5">Xác thực email:</dt>
+                            <dd class="col-sm-7">
+                                @if (Model.User.EmailConfirmed)
+                                {
+                                    <span class="badge bg-success">Đã xác thực</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Chưa xác thực</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-5">Ngày tạo:</dt>
+                            <dd class="col-sm-7">@Model.User.NgayTao.ToString("dd/MM/yyyy HH:mm")</dd>
+                        </dl>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-tools me-1"></i> Thao tác
+                </div>
+                <div class="card-body">
+                    <a asp-action="Edit" asp-route-id="@Model.NhanKhauId" class="btn btn-primary">
+                        <i class="fas fa-edit me-1"></i> Chỉnh sửa
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-list me-1"></i> Danh sách
+                    </a>
+                    @if (Model.HoKhau != null)
+                    {
+                        <a asp-action="Index" asp-route-hoKhauId="@Model.HoKhauId" class="btn btn-info">
+                            <i class="fas fa-users me-1"></i> Nhân khẩu cùng hộ
+                        </a>
+                    }
+                    <a asp-controller="TamTruTamVang" asp-action="Index" asp-route-nhanKhauId="@Model.NhanKhauId" class="btn btn-warning">
+                        <i class="fas fa-suitcase me-1"></i> Lịch sử tạm trú/vắng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

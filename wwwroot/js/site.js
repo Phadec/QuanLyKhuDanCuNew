@@ -126,3 +126,56 @@ $(document).ready(function() {
         setLoading(submitButton[0], true);
     });
 });
+
+// Export functionality with loading states and success feedback
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle export button clicks
+    const exportButtons = document.querySelectorAll('.export-btn');
+    
+    exportButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Add loading state
+            this.classList.add('loading');
+            this.style.pointerEvents = 'none';
+            
+            const exportType = this.dataset.type === 'excel' ? 'Excel' : 'PDF';
+            const originalText = this.innerHTML;
+            
+            // Show loading message
+            this.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Đang xuất ${exportType}...`;
+            
+            // Perform the actual download
+            const downloadUrl = this.href;
+            
+            // Create a temporary link for download
+            const tempLink = document.createElement('a');
+            tempLink.href = downloadUrl;
+            tempLink.style.display = 'none';
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+            
+            // Reset button after delay
+            setTimeout(() => {
+                this.classList.remove('loading');
+                this.classList.add('export-success');
+                this.innerHTML = `<i class="fas fa-check me-2"></i>Đã xuất ${exportType}!`;
+                this.style.pointerEvents = 'auto';
+                
+                // Reset to original state
+                setTimeout(() => {
+                    this.classList.remove('export-success');
+                    this.innerHTML = originalText;
+                }, 2000);
+            }, 1500);
+        });
+    });
+});
+
+// Enhanced chart animations
+if (typeof Chart !== 'undefined') {
+    Chart.defaults.animation.duration = 2000;
+    Chart.defaults.animation.easing = 'easeInOutQuart';
+}

@@ -5,8 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace QuanLyKhuDanCu.Data.Seeders
 {
     public static class HoKhauSeeder
-    {
-        public static async Task SeedHoKhauAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+    {        public static async Task SeedHoKhauAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             if (await context.HoKhaus.AnyAsync())
             {
@@ -49,6 +48,45 @@ namespace QuanLyKhuDanCu.Data.Seeders
                 }
 
                 await context.HoKhaus.AddRangeAsync(hoKhaus);
+                await context.SaveChangesAsync();
+
+                // Automatically add household heads as residents (nhân khẩu)
+                await AddHouseholdHeadsAsResidents(context, hoKhaus, userManager);
+            }
+        }
+
+        private static async Task AddHouseholdHeadsAsResidents(ApplicationDbContext context, List<HoKhau> hoKhaus, UserManager<ApplicationUser> userManager)
+        {
+            var nhanKhaus = new List<NhanKhau>();
+
+            foreach (var hoKhau in hoKhaus)
+            {
+                var chuHo = await userManager.FindByIdAsync(hoKhau.ChuHoId);
+                if (chuHo != null)
+                {                    var nhanKhau = new NhanKhau
+                    {
+                        HoTen = chuHo.HoTen,
+                        NgaySinh = chuHo.NgaySinh,
+                        GioiTinh = "Nam", // Default value, can be updated later
+                        CMND = chuHo.CMND,
+                        SoDienThoai = chuHo.SoDienThoai,
+                        Email = chuHo.Email ?? "",
+                        QuocTich = "Việt Nam",
+                        NgheNghiep = "Chưa cập nhật", // Default value
+                        NoiLamViec = "Chưa cập nhật", // Default value
+                        QuanHeVoiChuHo = "Chủ hộ",
+                        HoKhauId = hoKhau.HoKhauId,
+                        UserId = chuHo.Id,
+                        NgayDangKy = hoKhau.NgayTao,
+                        TrangThai = true
+                    };
+                    nhanKhaus.Add(nhanKhau);
+                }
+            }
+
+            if (nhanKhaus.Any())
+            {
+                await context.NhanKhaus.AddRangeAsync(nhanKhaus);
                 await context.SaveChangesAsync();
             }
         }

@@ -1,0 +1,134 @@
+@model QuanLyKhuDanCu.Models.NhanKhau
+
+@{
+    ViewData["Title"] = "Xóa Nhân khẩu";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Xóa Nhân khẩu</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Nhân khẩu</a></li>
+        <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.NhanKhauId">@Model.HoTen</a></li>
+        <li class="breadcrumb-item active">Xóa</li>
+    </ol>
+
+    <div class="alert alert-danger">
+        <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Xác nhận xóa!</h4>
+        <p>Bạn có chắc chắn muốn xóa thông tin nhân khẩu này không? Hành động này không thể hoàn tác.</p>
+        <p>Việc xóa nhân khẩu cũng sẽ xóa tất cả dữ liệu tạm trú/tạm vắng và các thông tin liên quan.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-trash-alt me-1"></i> Thông tin Nhân khẩu sẽ bị xóa
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Họ và tên:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.HoTen)</dd>
+
+                        <dt class="col-sm-4">Ngày sinh:</dt>
+                        <dd class="col-sm-8">@Model.NgaySinh.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Giới tính:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.GioiTinh)</dd>
+
+                        <dt class="col-sm-4">CMND/CCCD:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.CMND)</dd>
+
+                        <dt class="col-sm-4">Số điện thoại:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.SoDienThoai)</dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
+
+                        <dt class="col-sm-4">Quan hệ với chủ hộ:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.QuanHeVoiChuHo)</dd>
+
+                        @if (Model.HoKhau != null)
+                        {
+                            <dt class="col-sm-4">Hộ khẩu:</dt>
+                            <dd class="col-sm-8">
+                                <a asp-controller="HoKhau" asp-action="Details" asp-route-id="@Model.HoKhau.HoKhauId">
+                                    @Model.HoKhau.MaHoKhau
+                                </a>
+                            </dd>
+
+                            <dt class="col-sm-4">Địa chỉ:</dt>
+                            <dd class="col-sm-8">@Model.HoKhau.DiaChi</dd>
+                        }
+
+                        <dt class="col-sm-4">Nghề nghiệp:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.NgheNghiep)</dd>
+
+                        <dt class="col-sm-4">Nơi làm việc:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.NoiLamViec)</dd>
+
+                        <dt class="col-sm-4">Ngày đăng ký:</dt>
+                        <dd class="col-sm-8">@Model.NgayDangKy.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.TrangThai)
+                            {
+                                <span class="badge bg-success">Hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Không hoạt động</span>
+                            }
+                        </dd>
+
+                        @if (Model.User != null)
+                        {
+                            <dt class="col-sm-4">Tài khoản liên kết:</dt>
+                            <dd class="col-sm-8">@Model.User.UserName (@Model.User.Email)</dd>
+                        }
+                    </dl>
+                </div>
+                <div class="card-footer">
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="NhanKhauId" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt me-1"></i> Xóa vĩnh viễn
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.NhanKhauId" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Hủy
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-1"></i> Danh sách
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <i class="fas fa-info-circle me-1"></i> Thông tin quan trọng
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">Dữ liệu sẽ bị xóa:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-danger me-2"></i>Thông tin cá nhân</li>
+                        <li><i class="fas fa-check text-danger me-2"></i>Lịch sử tạm trú/tạm vắng</li>
+                        <li><i class="fas fa-check text-danger me-2"></i>Liên kết tài khoản hệ thống</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h6 class="card-title">Dữ liệu không bị ảnh hưởng:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-shield-alt text-success me-2"></i>Thông tin hộ khẩu</li>
+                        <li><i class="fas fa-shield-alt text-success me-2"></i>Nhân khẩu khác trong hộ</li>
+                        <li><i class="fas fa-shield-alt text-success me-2"></i>Hóa đơn đã tạo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

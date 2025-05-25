@@ -26,11 +26,13 @@ namespace QuanLyKhuDanCu.Data.Seeders
                 // Step 3: Seed services and fee types
                 await DichVuSeeder.SeedDichVuAsync(context);
                 await LoaiPhiSeeder.SeedLoaiPhiAsync(context);
-                
-                // Step 4: Seed households and people
+                  // Step 4: Seed households (automatically includes household heads as residents)
                 await HoKhauSeeder.SeedHoKhauAsync(context, userManager);
                 
-                // Step 5: Seed announcements
+                // Step 5: Seed additional family members for households
+                await NhanKhauSeeder.SeedNhanKhauAsync(context, userManager);
+                
+                // Step 6: Seed announcements
                 await ThongBaoSeeder.SeedThongBaoAsync(context, userManager);
             }
             catch (Exception ex)

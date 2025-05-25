@@ -3,8 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyKhuDanCu.Data;
 using QuanLyKhuDanCu.Models;
 using QuanLyKhuDanCu.Data.Seeders;
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure EPPlus license
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

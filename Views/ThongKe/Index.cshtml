@@ -232,14 +232,17 @@
                 <div class="card-body">
                     <p><strong>Ngày cập nhật:</strong> @DateTime.Now.ToString("dd/MM/yyyy")</p>
                     <p><strong>Thời gian:</strong> @DateTime.Now.ToString("HH:mm:ss")</p>
-                    <p><strong>Phiên bản:</strong> 1.0.0</p>
-                    <div class="mt-3">
-                        <a asp-action="ExportData" asp-route-type="excel" class="btn btn-primary btn-sm">
-                            <i class="fas fa-download"></i> Xuất Excel
-                        </a>
-                        <a asp-action="ExportData" asp-route-type="pdf" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-file-pdf"></i> Xuất PDF
-                        </a>
+                    <p><strong>Phiên bản:</strong> 1.0.0</p>                    <div class="mt-3">
+                        <div class="d-grid gap-2">
+                            <a href="@Url.Action("ExportData", new { type = "excel" })" class="btn btn-success btn-sm export-btn" data-type="excel">
+                                <i class="fas fa-file-excel me-2"></i>
+                                Xuất Excel
+                            </a>
+                            <a href="@Url.Action("ExportData", new { type = "pdf" })" class="btn btn-danger btn-sm export-btn" data-type="pdf">
+                                <i class="fas fa-file-pdf me-2"></i>
+                                Xuất PDF
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
