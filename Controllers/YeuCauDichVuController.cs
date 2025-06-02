@@ -160,9 +160,10 @@ namespace QuanLyKhuDanCu.Controllers
                     yeuCauDichVu.NguoiXuLyId = user.Id; // Set the staff member as the processor
                     yeuCauDichVu.NgayXuLy = DateTime.Now;
                 }
-                
-                _context.Add(yeuCauDichVu);
+                  _context.Add(yeuCauDichVu);
                 await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Tạo yêu cầu dịch vụ thành công.";
                 
                 if (User.IsInRole("Resident"))
                 {
@@ -320,11 +321,10 @@ namespace QuanLyKhuDanCu.Controllers
                 {
                     yeuCauDichVu.NgayXuLy = DateTime.Now;
                 }
-            }
-
-            _context.Update(yeuCauDichVu);
+            }            _context.Update(yeuCauDichVu);
             await _context.SaveChangesAsync();
 
+            TempData["SuccessMessage"] = "Xử lý yêu cầu dịch vụ thành công.";
             return RedirectToAction(nameof(Details), new { id = yeuCauDichVu.YeuCauDichVuId });
         }
 

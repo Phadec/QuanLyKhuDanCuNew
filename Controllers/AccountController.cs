@@ -87,16 +87,19 @@ namespace QuanLyKhuDanCu.Controllers
                     NgayTao = DateTime.Now,
                     TrangThai = true,
                     Avatar = string.Empty
-                };
-
-                var result = await _userManager.CreateAsync(user, model.Password);
+                };                var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    // Auto-confirm email since we don't have email service
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    await _userManager.ConfirmEmailAsync(user, token);
+                    
                     // By default, add all new users to the Resident role
                     await _userManager.AddToRoleAsync(user, "Resident");
                     
                     // Sign in the user
                     await _signInManager.SignInAsync(user, isPersistent: false);
+                    TempData["SuccessMessage"] = "Đăng ký tài khoản thành công! Chào mừng bạn đến với hệ thống.";
                     return RedirectToLocal(returnUrl);
                 }
                 

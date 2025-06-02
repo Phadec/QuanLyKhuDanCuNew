@@ -139,10 +139,9 @@ namespace QuanLyKhuDanCu.Controllers
                     HanThanhToan = model.HanThanhToan,
                     TrangThai = "ChuaThanhToan",
                     GhiChu = model.GhiChu
-                };
-
-                _context.Add(hoaDon);
+                };                _context.Add(hoaDon);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Tạo hóa đơn thành công.";
                 return RedirectToAction(nameof(Index));
             }
             ViewData["HoKhauId"] = new SelectList(_context.HoKhaus, "HoKhauId", "MaHoKhau");
@@ -287,10 +286,9 @@ namespace QuanLyKhuDanCu.Controllers
 
             hoaDon.TrangThai = "DaThanhToan";
             hoaDon.NgayThanhToan = DateTime.Now;
-            hoaDon.NguoiThuId = user.Id;
-
-            _context.Update(hoaDon);
+            hoaDon.NguoiThuId = user.Id;            _context.Update(hoaDon);
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Cập nhật hóa đơn thành công.";
             return RedirectToAction(nameof(Index));
         }        // GET: HoaDon/Delete/5
         [Authorize(Policy = "RequireStaffRole")]
@@ -331,9 +329,9 @@ namespace QuanLyKhuDanCu.Controllers
             {
                 return BadRequest("Không thể xóa hóa đơn đã thanh toán");
             }
-            
-            _context.HoaDons.Remove(hoaDon);
+              _context.HoaDons.Remove(hoaDon);
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Xóa hóa đơn thành công.";
             return RedirectToAction(nameof(Index));
         }
 

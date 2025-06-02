@@ -30,13 +30,11 @@ namespace QuanLyKhuDanCu.Controllers
         // GET: UserManagement
         public async Task<IActionResult> Index(string searchString, string role, int page = 1)
         {
-            var query = _userManager.Users.AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchString))
+            var query = _userManager.Users.AsQueryable();            if (!string.IsNullOrEmpty(searchString))
             {
                 query = query.Where(u => 
-                    u.UserName.Contains(searchString) || 
-                    u.Email.Contains(searchString) ||
+                    (u.UserName != null && u.UserName.Contains(searchString)) || 
+                    (u.Email != null && u.Email.Contains(searchString)) ||
                     u.HoTen.Contains(searchString));
             }
 
@@ -262,11 +260,10 @@ namespace QuanLyKhuDanCu.Controllers
             if (user == null)
             {
                 return NotFound();
-            }
-
-            var result = await _userManager.DeleteAsync(user);
+            }            var result = await _userManager.DeleteAsync(user);
             if (result.Succeeded)
             {
+                TempData["SuccessMessage"] = "Xóa người dùng thành công.";
                 return RedirectToAction(nameof(Index));
             }
             foreach (var error in result.Errors)

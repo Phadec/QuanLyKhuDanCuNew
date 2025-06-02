@@ -83,13 +83,11 @@ namespace QuanLyKhuDanCu.Controllers
             if (phanAnh == null)
             {
                 return NotFound();
-            }
-
-            // Check authorization for residents
+            }            // Check authorization for residents
             if (User.IsInRole("Resident"))
             {
                 var currentUser = await _userManager.GetUserAsync(User);
-                if (phanAnh.UserId != currentUser.Id)
+                if (currentUser != null && phanAnh.UserId != currentUser.Id)
                 {
                     return Forbid();
                 }
@@ -144,10 +142,10 @@ namespace QuanLyKhuDanCu.Controllers
                     }
 
                     phanAnh.FileDinhKem = uniqueFileName;
-                }
-
-                _context.PhanAnhs.Add(phanAnh);
+                }                _context.PhanAnhs.Add(phanAnh);
                 await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Gửi phản ánh thành công.";
                 
                 if (User.IsInRole("Resident"))
                 {
@@ -306,34 +304,39 @@ namespace QuanLyKhuDanCu.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var phanAnh = await _context.PhanAnhs.FindAsync(id);
-            
-            // Check authorization again
+              // Check authorization again
             var currentUser = await _userManager.GetUserAsync(User);
             bool isAdmin = User.IsInRole("Admin");
             
-            if (!isAdmin && phanAnh.UserId != currentUser.Id)
+            if (phanAnh == null)
+            {
+                return NotFound();
+            }
+              if (!isAdmin && currentUser != null && phanAnh.UserId != currentUser.Id)
             {
                 return Forbid();
             }
             
             // Residents can only delete pending feedback
-            if (User.IsInRole("Resident") && phanAnh.TrangThai != "ChoXuLy")
+            if (User.IsInRole("Resident") && phanAnh?.TrangThai != "ChoXuLy")
             {
                 return BadRequest("Không thể xóa phản ánh đã được xử lý.");
             }
-            
-            // Delete the file if it exists
-            if (!string.IsNullOrEmpty(phanAnh.FileDinhKem))
+              // Delete the file if it exists
+            if (!string.IsNullOrEmpty(phanAnh?.FileDinhKem))
             {
                 string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "phananh", phanAnh.FileDinhKem);
                 if (System.IO.File.Exists(filePath))
                 {
                     System.IO.File.Delete(filePath);
                 }
+            }              if (phanAnh != null)
+            {
+                _context.PhanAnhs.Remove(phanAnh);
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Xóa phản ánh thành công.";
             }
-            
-            _context.PhanAnhs.Remove(phanAnh);
-            await _context.SaveChangesAsync();
             
             if (User.IsInRole("Resident"))
             {
@@ -358,13 +361,11 @@ namespace QuanLyKhuDanCu.Controllers
             if (phanAnh == null || string.IsNullOrEmpty(phanAnh.FileDinhKem))
             {
                 return NotFound();
-            }
-
-            // Check authorization
+            }            // Check authorization
             if (User.IsInRole("Resident"))
             {
                 var currentUser = await _userManager.GetUserAsync(User);
-                if (phanAnh.UserId != currentUser.Id)
+                if (currentUser != null && phanAnh.UserId != currentUser.Id)
                 {
                     return Forbid();
                 }

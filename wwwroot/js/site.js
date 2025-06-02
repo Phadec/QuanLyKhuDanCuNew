@@ -120,10 +120,47 @@ $(document).ready(function() {
         $(this).attr('data-original-text', $(this).html());
     });
     
-    // Set loading state when form is submitted
-    $('form').on('submit', function() {
-        const submitButton = $(this).find('button[type="submit"]');
+    // Enhanced form submission handling
+    $('form').on('submit', function(e) {
+        const form = this;
+        const submitButton = $(form).find('button[type="submit"]');
+        
+        // Check if form is valid before showing loading state
+        if (form.checkValidity && !form.checkValidity()) {
+            // Form is invalid, don't show loading state
+            return;
+        }
+        
+        // Check jQuery validation if available
+        if (typeof $.fn.valid === 'function' && $(form).valid && !$(form).valid()) {
+            // jQuery validation failed, don't show loading state
+            return;
+        }
+        
+        // Form appears valid, show loading state
         setLoading(submitButton[0], true);
+        
+        // Set a timeout to reset button if page doesn't redirect (validation errors)
+        setTimeout(function() {
+            if (submitButton.length > 0 && submitButton.is(':disabled')) {
+                setLoading(submitButton[0], false);
+            }
+        }, 3000);
+    });
+    
+    // Reset button state when validation errors are shown
+    $(document).on('DOMNodeInserted', function(e) {
+        const target = $(e.target);
+        if (target.hasClass('validation-summary-errors') || 
+            target.find('.validation-summary-errors').length > 0 ||
+            target.hasClass('field-validation-error') ||
+            target.find('.field-validation-error').length > 0) {
+            
+            // Reset all submit buttons on the page
+            $('button[type="submit"]:disabled').each(function() {
+                setLoading(this, false);
+            });
+        }
     });
 });
 

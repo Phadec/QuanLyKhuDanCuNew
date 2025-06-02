@@ -32,9 +32,13 @@ namespace QuanLyKhuDanCu.Controllers
 
         // GET: ThongBao
         [Authorize]
-        public async Task<IActionResult> Index(string searchString, int page = 1)
-        {
+        public async Task<IActionResult> Index(string searchString, int page = 1)        {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            
             var roles = await _userManager.GetRolesAsync(user);
 
             var query = _context.ThongBaos.AsQueryable();
@@ -87,15 +91,18 @@ namespace QuanLyKhuDanCu.Controllers
 
             var thongBao = await _context.ThongBaos
                 .Include(t => t.NguoiTao)
-                .FirstOrDefaultAsync(m => m.ThongBaoId == id);
-
-            if (thongBao == null)
+                .FirstOrDefaultAsync(m => m.ThongBaoId == id);            if (thongBao == null)
             {
                 return NotFound();
             }
 
             // Check if the user has permission to view this announcement
             var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            
             var roles = await _userManager.GetRolesAsync(user);
 
             bool canView = false;
@@ -351,30 +358,39 @@ namespace QuanLyKhuDanCu.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "RequireStaffRole")]
         public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var thongBao = await _context.ThongBaos.FindAsync(id);
+        {            var thongBao = await _context.ThongBaos.FindAsync(id);
+            
+            if (thongBao == null)
+            {
+                return NotFound();
+            }
             
             // Check if user has rights to delete this announcement
             var user = await _userManager.GetUserAsync(User);
             var isAdmin = User.IsInRole("Admin");
             
-            if (!isAdmin && thongBao.NguoiTaoId != user.Id)
+            if (!isAdmin && user != null && thongBao.NguoiTaoId != user.Id)
             {
                 return Forbid();
             }
 
             // Delete the file if it exists
-            if (!string.IsNullOrEmpty(thongBao.FileDinhKem))
+            if (!string.IsNullOrEmpty(thongBao?.FileDinhKem))
             {
                 string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "thongbao", thongBao.FileDinhKem);
                 if (System.IO.File.Exists(filePath))
-                {
-                    System.IO.File.Delete(filePath);
+                {                    System.IO.File.Delete(filePath);
                 }
             }
             
-            _context.ThongBaos.Remove(thongBao);
-            await _context.SaveChangesAsync();
+            if (thongBao != null)
+            {
+                _context.ThongBaos.Remove(thongBao);
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Xóa thông báo thành công.";
+            }
+            
             return RedirectToAction(nameof(Index));
         }
 
@@ -391,10 +407,13 @@ namespace QuanLyKhuDanCu.Controllers
             if (thongBao == null || string.IsNullOrEmpty(thongBao.FileDinhKem))
             {
                 return NotFound();
-            }
-
-            // Check if the user has permission to view this announcement
+            }            // Check if the user has permission to view this announcement
             var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            
             var roles = await _userManager.GetRolesAsync(user);
 
             bool canView = false;

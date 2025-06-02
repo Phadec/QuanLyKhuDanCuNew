@@ -31,12 +31,10 @@ namespace QuanLyKhuDanCu.Controllers
             var query = _context.TamTruTamVangs
                 .Include(t => t.NhanKhau)
                 .Include(t => t.NguoiDuyet)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchString))
+                .AsQueryable();            if (!string.IsNullOrEmpty(searchString))
             {
                 query = query.Where(t => 
-                    t.NhanKhau.HoTen.Contains(searchString) || 
+                    (t.NhanKhau != null && t.NhanKhau.HoTen != null && t.NhanKhau.HoTen.Contains(searchString)) || 
                     t.LyDo.Contains(searchString) ||
                     t.DiaChiTamTruTamVang.Contains(searchString));
             }
@@ -199,10 +197,10 @@ namespace QuanLyKhuDanCu.Controllers
                     tamTruTamVang.TrangThai = "DaXuLy";
                     tamTruTamVang.NgayDuyet = DateTime.Now;
                     tamTruTamVang.NguoiDuyetId = user.Id;
-                }
-
-                _context.Add(tamTruTamVang);
+                }                _context.Add(tamTruTamVang);
                 await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Tạo đơn tạm trú/tạm vắng thành công.";
                 
                 if (User.IsInRole("Resident"))
                 {
@@ -285,10 +283,10 @@ namespace QuanLyKhuDanCu.Controllers
             tamTruTamVang.TrangThai = decision == "approve" ? "DaDuyet" : "TuChoi";
             tamTruTamVang.NguoiDuyetId = user.Id;
             tamTruTamVang.NgayDuyet = DateTime.Now;
-            tamTruTamVang.GhiChu = ghiChu;
-
-            _context.Update(tamTruTamVang);
+            tamTruTamVang.GhiChu = ghiChu;            _context.Update(tamTruTamVang);
             await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = decision == "approve" ? "Duyệt đơn thành công." : "Từ chối đơn thành công.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -356,9 +354,10 @@ namespace QuanLyKhuDanCu.Controllers
                     return Forbid();
                 }
             }
-            
-            _context.TamTruTamVangs.Remove(tamTruTamVang);
+              _context.TamTruTamVangs.Remove(tamTruTamVang);
             await _context.SaveChangesAsync();
+            
+            TempData["SuccessMessage"] = "Xóa đơn tạm trú/tạm vắng thành công.";
             
             if (User.IsInRole("Resident"))
             {
