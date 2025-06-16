@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyKhuDanCu.Data;
 using QuanLyKhuDanCu.Models;
 using QuanLyKhuDanCu.Data.Seeders;
+using QuanLyKhuDanCu.Helpers;
 using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,12 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
+
+// Register Email Service
+builder.Services.AddTransient<IEmailService, EmailService>();
+
+// Register HttpContextAccessor
+builder.Services.AddHttpContextAccessor();
 
 // Add policy-based authorization
 builder.Services.AddAuthorization(options =>
