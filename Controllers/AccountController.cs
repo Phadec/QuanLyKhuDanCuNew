@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using QuanLyKhuDanCu.Helpers;
 using QuanLyKhuDanCu.Models;
 using QuanLyKhuDanCu.ViewModels;
 using System;
@@ -15,15 +17,21 @@ namespace QuanLyKhuDanCu.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IEmailService _emailService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IEmailService emailService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _emailService = emailService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [AllowAnonymous]
@@ -44,6 +52,21 @@ namespace QuanLyKhuDanCu.Controllers
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
+                    // Get user information for the email
+                    var user = await _userManager.FindByEmailAsync(model.Email);
+                    if (user != null)
+                    {
+                        // Get IP address
+                        string ipAddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                        
+                        // Send login notification email asynchronously (don't await to avoid delaying the login process)
+                        _ = _emailService.SendLoginNotificationAsync(
+                            user.Email, 
+                            user.HoTen ?? user.UserName, 
+                            DateTime.Now, 
+                            ipAddress);
+                    }
+                    
                     return RedirectToLocal(returnUrl);
                 }
                 if (result.IsLockedOut)

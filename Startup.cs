@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QuanLyKhuDanCu.Data;
+using QuanLyKhuDanCu.Helpers;
 using QuanLyKhuDanCu.Models;
 using System;
 
@@ -59,6 +60,12 @@ namespace QuanLyKhuDanCu
                 options.AddPolicy("RequireStaffRole", policy => policy.RequireRole("Admin", "Manager", "Staff"));
                 options.AddPolicy("RequireResidentRole", policy => policy.RequireRole("Resident"));
             });
+
+            // Register Email Service
+            services.AddTransient<IEmailService, EmailService>();
+            
+            // Register HttpContextAccessor
+            services.AddHttpContextAccessor();
 
             services.AddControllersWithViews();
         }
